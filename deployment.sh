@@ -44,9 +44,19 @@ load_env() {
 check_env() {
   load_env
   local missing=()
-  [[ -z "${SECRET_KEY:-}" || "$SECRET_KEY" == "change-me-to-a-long-random-string" ]] && missing+=("SECRET_KEY")
-  [[ ${#SECRET_KEY:-0} -lt 32 ]] && missing+=("SECRET_KEY(>=32 chars)")
-  [[ -z "${POSTGRES_PASSWORD:-}" || "$POSTGRES_PASSWORD" == "REPLACE_WITH_STRONG_PASSWORD" ]] && missing+=("POSTGRES_PASSWORD")
+  local secret_key="${SECRET_KEY:-}"
+  local postgres_password="${POSTGRES_PASSWORD:-}"
+
+  if [[ -z "$secret_key" || "$secret_key" == "change-me-to-a-long-random-string" ]]; then
+    missing+=("SECRET_KEY")
+  elif [[ ${#secret_key} -lt 32 ]]; then
+    missing+=("SECRET_KEY(>=32 chars)")
+  fi
+
+  if [[ -z "$postgres_password" || "$postgres_password" == "REPLACE_WITH_STRONG_PASSWORD" ]]; then
+    missing+=("POSTGRES_PASSWORD")
+  fi
+
   [[ -z "${FLASK_ENV:-}" ]] && export FLASK_ENV=production
 
   if ((${#missing[@]})); then
