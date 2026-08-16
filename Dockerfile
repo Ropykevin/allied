@@ -33,10 +33,13 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 COPY . .
 COPY --from=assets /build/app/static/css/main.css ./app/static/css/main.css
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN mkdir -p /app/app/static/uploads /app/instance/invoices \
     && useradd --create-home --shell /bin/bash allied \
-    && chown -R allied:allied /app
+    && sed -i 's/\r$//' /docker-entrypoint.sh \
+    && chmod +x /docker-entrypoint.sh \
+    && chown -R allied:allied /app /docker-entrypoint.sh
 
 USER allied
 
@@ -45,4 +48,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=5 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=4)" || exit 1
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
