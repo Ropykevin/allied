@@ -15,7 +15,8 @@ from app.extensions import csrf, db, limiter, login_manager, mail, migrate
 
 
 def create_app(config_name: str | None = None) -> Flask:
-    load_dotenv(override=True)
+    # Do not override existing process env (Docker Compose / systemd must win).
+    load_dotenv(override=False)
     app = Flask(
         __name__,
         instance_relative_config=True,
