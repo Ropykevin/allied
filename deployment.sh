@@ -107,7 +107,8 @@ cmd_migrate() {
   require_cmd docker
   load_env
   log "Running database migrations..."
-  "${COMPOSE[@]}" exec -T "$WEB_SERVICE" flask db upgrade
+  # Use entrypoint so DATABASE_URL is built (exec alone skips ENTRYPOINT).
+  "${COMPOSE[@]}" exec -T "$WEB_SERVICE" /docker-entrypoint.sh flask db upgrade
   log "Migrations complete."
 }
 
@@ -119,7 +120,7 @@ cmd_seed() {
     -e SEED_DEMO_USERS="${SEED_DEMO_USERS:-false}" \
     -e SEED_ADMIN_EMAIL="${SEED_ADMIN_EMAIL:-}" \
     -e SEED_ADMIN_PASSWORD="${SEED_ADMIN_PASSWORD:-}" \
-    "$WEB_SERVICE" flask seed
+    "$WEB_SERVICE" /docker-entrypoint.sh flask seed
   log "Seed complete."
 }
 

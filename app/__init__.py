@@ -17,6 +17,11 @@ from app.extensions import csrf, db, limiter, login_manager, mail, migrate
 def create_app(config_name: str | None = None) -> Flask:
     # Do not override existing process env (Docker Compose / systemd must win).
     load_dotenv(override=False)
+
+    from app.utils.db_url import ensure_database_url
+
+    ensure_database_url()
+
     app = Flask(
         __name__,
         instance_relative_config=True,
@@ -25,6 +30,10 @@ def create_app(config_name: str | None = None) -> Flask:
     )
     config_obj = get_config(config_name or os.getenv("FLASK_ENV", "development"))
     app.config.from_object(config_obj)
+    # Refresh URI after ensure_database_url (from_object may have read empty value).
+    db_url = os.environ.get("DATABASE_URL") or ""
+    if db_url:
+        app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
     env_name = (config_name or os.getenv("FLASK_ENV", "development")).lower()
     if env_name == "production":
@@ -32,7 +41,10 @@ def create_app(config_name: str | None = None) -> Flask:
         if len(secret) < 32:
             raise RuntimeError("SECRET_KEY must be at least 32 characters in production.")
         if not app.config.get("SQLALCHEMY_DATABASE_URI"):
-            raise RuntimeError("DATABASE_URL is required in production.")
+            raise RuntimeError(
+                "DATABASE_URL is required in production "
+                "(or set POSTGRES_USER/POSTGRES_PASSWORD/POSTGRES_DB/POSTGRES_HOST)."
+            )
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
     upload_folder = Path(app.config["UPLOAD_FOLDER"])
