@@ -10,7 +10,7 @@ from app.extensions import db
 from app.models import Destination, Tour, TourExclusion, TourInclusion
 from app.utils.audit import log_action
 from app.utils.helpers import slugify
-from app.utils.uploads import UploadError, save_image
+from app.utils.uploads import UploadError, has_upload, save_image
 
 
 def _populate_tour_choices(form: TourForm) -> None:
@@ -81,7 +81,7 @@ def tours_create():
                 seo_title=form.seo_title.data,
                 seo_description=form.seo_description.data,
             )
-            if form.hero_image_file.data:
+            if has_upload(form.hero_image_file.data):
                 try:
                     tour.hero_image = save_image(form.hero_image_file.data, "tours")
                 except UploadError as exc:
@@ -131,7 +131,7 @@ def tours_edit(tour_id: int):
             tour.is_published = form.is_published.data
             tour.seo_title = form.seo_title.data
             tour.seo_description = form.seo_description.data
-            if form.hero_image_file.data:
+            if has_upload(form.hero_image_file.data):
                 try:
                     tour.hero_image = save_image(form.hero_image_file.data, "tours")
                 except UploadError as exc:

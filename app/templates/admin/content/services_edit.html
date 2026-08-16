@@ -9,6 +9,18 @@
   <div class="admin-card">
     <form method="post" enctype="multipart/form-data" class="space-y-5">
       {{ form.hidden_tag() }}
+      {% if form.errors %}
+      <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <p class="font-medium">Please fix the following:</p>
+        <ul class="mt-1 list-disc pl-5">
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+            <li>{{ form[field].label.text if field in form else field }}: {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
 
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
@@ -53,6 +65,7 @@
           <img src="{{ url_for('static', filename=service.icon_image) }}" alt="" class="mb-2 h-16 w-16 rounded-md object-cover border border-chocolate/10">
           {% endif %}
           {{ form.icon_image(class_='input-field') }}
+          <p class="mt-1 text-xs text-ink-muted">JPG, PNG, or WEBP only (not HEIC)</p>
         </div>
         <div>
           {{ form.hero_image.label(class_='label') }}
@@ -60,6 +73,7 @@
           <img src="{{ url_for('static', filename=service.hero_image) }}" alt="" class="mb-2 h-16 w-28 rounded-md object-cover border border-chocolate/10">
           {% endif %}
           {{ form.hero_image(class_='input-field') }}
+          <p class="mt-1 text-xs text-ink-muted">JPG, PNG, or WEBP only (not HEIC)</p>
         </div>
         <div>
           {{ form.seo_title.label(class_='label') }}

@@ -20,7 +20,7 @@ from app.models.mixins import utcnow
 from app.utils.audit import log_action
 from app.utils.helpers import slugify
 from app.utils.sanitize import safe_external_url
-from app.utils.uploads import UploadError, delete_upload, save_image
+from app.utils.uploads import UploadError, delete_upload, has_upload, save_image
 
 
 @bp.route("/content/blog")
@@ -49,7 +49,7 @@ def blog_create():
             author_id=current_user.id,
             published_at=utcnow() if form.is_published.data else None,
         )
-        if form.featured_image_file.data:
+        if has_upload(form.featured_image_file.data):
             try:
                 post.featured_image = save_image(form.featured_image_file.data, "blog")
             except UploadError as exc:
@@ -79,7 +79,7 @@ def blog_edit(post_id: int):
         post.seo_description = form.seo_description.data
         if form.is_published.data and not post.published_at:
             post.published_at = utcnow()
-        if form.featured_image_file.data:
+        if has_upload(form.featured_image_file.data):
             try:
                 post.featured_image = save_image(form.featured_image_file.data, "blog")
             except UploadError as exc:
@@ -161,7 +161,7 @@ def gallery_edit(image_id: int):
         image.sort_order = form.sort_order.data or 0
         image.is_published = form.is_published.data
         image.is_featured = form.is_featured.data
-        if form.image_file.data and getattr(form.image_file.data, "filename", None):
+        if has_upload(form.image_file.data):
             try:
                 old_path = image.image_path
                 image.image_path = save_image(form.image_file.data, "gallery")
@@ -316,14 +316,14 @@ def services_list():
             is_featured=form.is_featured.data,
             is_bookable=form.is_bookable.data,
         )
-        if form.icon_image.data:
+        if has_upload(form.icon_image.data):
             try:
                 service.icon_image = save_image(form.icon_image.data, "services", max_width=800)
             except UploadError as exc:
                 flash(str(exc), "danger")
                 services = Service.query.order_by(Service.sort_order, Service.id).all()
                 return render_template("admin/content/services.html", form=form, services=services)
-        if form.hero_image.data:
+        if has_upload(form.hero_image.data):
             try:
                 service.hero_image = save_image(form.hero_image.data, "services", max_width=1800)
             except UploadError as exc:
@@ -362,7 +362,7 @@ def services_edit(service_id: int):
         service.is_published = form.is_published.data
         service.is_featured = form.is_featured.data
         service.is_bookable = form.is_bookable.data
-        if form.icon_image.data:
+        if has_upload(form.icon_image.data):
             try:
                 new_path = save_image(form.icon_image.data, "services", max_width=800)
                 delete_upload(service.icon_image)
@@ -370,7 +370,7 @@ def services_edit(service_id: int):
             except UploadError as exc:
                 flash(str(exc), "danger")
                 return render_template("admin/content/services_edit.html", form=form, service=service)
-        if form.hero_image.data:
+        if has_upload(form.hero_image.data):
             try:
                 new_path = save_image(form.hero_image.data, "services", max_width=1800)
                 delete_upload(service.hero_image)
@@ -414,7 +414,7 @@ def partners_list():
             is_published=form.is_published.data,
             is_featured=form.is_featured.data,
         )
-        if form.logo.data:
+        if has_upload(form.logo.data):
             try:
                 partner.logo_path = save_image(form.logo.data, "partners", max_width=600)
             except UploadError as exc:
@@ -443,7 +443,7 @@ def partners_edit(partner_id: int):
         partner.sort_order = form.sort_order.data or 0
         partner.is_published = form.is_published.data
         partner.is_featured = form.is_featured.data
-        if form.logo.data:
+        if has_upload(form.logo.data):
             try:
                 new_path = save_image(form.logo.data, "partners", max_width=600)
                 delete_upload(partner.logo_path)

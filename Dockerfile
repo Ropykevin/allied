@@ -41,8 +41,7 @@ RUN mkdir -p /app/app/static/uploads /app/instance/invoices \
     && chmod +x /docker-entrypoint.sh \
     && chown -R allied:allied /app /docker-entrypoint.sh
 
-USER allied
-
+# Stay root for entrypoint (chown named volumes), then drop to allied.
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=5 \

@@ -11,7 +11,7 @@ from app.models import Destination
 from app.utils.audit import log_action
 from app.utils.helpers import slugify
 from app.utils.sanitize import safe_map_embed_url
-from app.utils.uploads import UploadError, save_image
+from app.utils.uploads import UploadError, has_upload, save_image
 
 
 @bp.route("/destinations")
@@ -52,7 +52,7 @@ def destinations_create():
                 seo_title=form.seo_title.data,
                 seo_description=form.seo_description.data,
             )
-            if form.hero_image_file.data:
+            if has_upload(form.hero_image_file.data):
                 try:
                     dest.hero_image = save_image(form.hero_image_file.data, "destinations")
                 except UploadError as exc:
@@ -81,7 +81,7 @@ def destinations_edit(destination_id: int):
             form.populate_obj(destination)
             destination.slug = slug
             destination.map_embed_url = safe_map_embed_url(form.map_embed_url.data)
-            if form.hero_image_file.data:
+            if has_upload(form.hero_image_file.data):
                 try:
                     destination.hero_image = save_image(form.hero_image_file.data, "destinations")
                 except UploadError as exc:

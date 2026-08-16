@@ -29,6 +29,11 @@ class UploadError(Exception):
     pass
 
 
+def has_upload(file_storage) -> bool:
+    """True only when the browser sent a real file (empty FileStorage is truthy)."""
+    return bool(file_storage and getattr(file_storage, "filename", None))
+
+
 def _allowed_extension(filename: str) -> bool:
     if "." not in filename:
         return False
@@ -51,7 +56,13 @@ def save_image(file: FileStorage, subfolder: str = "general", max_width: int = 1
 
     upload_root = _upload_root()
     target_dir = upload_root / safe_sub
-    target_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        target_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise UploadError(
+            "Upload folder is not writable. On Docker, ensure the uploads volume "
+            "is owned by the app user (redeploy with the latest entrypoint)."
+        ) from exc
 
     original = secure_filename(file.filename)
     ext = original.rsplit(".", 1)[1].lower()
@@ -67,7 +78,7 @@ def save_image(file: FileStorage, subfolder: str = "general", max_width: int = 1
         image = Image.open(file.stream)
         fmt = (image.format or "").upper()
         if fmt not in ALLOWED_PIL_FORMATS:
-            raise UploadError("Unsupported image format.")
+            raise UploadError("Unsupported image format. Use JPG, PNG, or WEBP.")
         if image.mode not in ("RGB", "RGBA"):
             image = image.convert("RGB")
         # Basic decompression bomb guard
@@ -86,6 +97,12 @@ def save_image(file: FileStorage, subfolder: str = "general", max_width: int = 1
         if path.exists():
             path.unlink(missing_ok=True)
         raise
+    except OSError as exc:
+        if path.exists():
+            path.unlink(missing_ok=True)
+        raise UploadError(
+            "Could not write the image file. Check upload folder permissions."
+        ) from exc
     except Exception as exc:  # noqa: BLE001
         if path.exists():
             path.unlink(missing_ok=True)
