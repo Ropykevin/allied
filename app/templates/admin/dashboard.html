@@ -1,0 +1,138 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Dashboard — {{ company_name }}{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Overview of bookings, revenue, and operations</p>{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">New Bookings</p>
+    <p class="mt-2 font-display text-3xl text-chocolate">{% if can_bookings %}{{ stats.new_bookings }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Pending Invoices</p>
+    <p class="mt-2 font-display text-3xl text-chocolate">{% if can_invoices %}{{ stats.pending_invoices }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Confirmed</p>
+    <p class="mt-2 font-display text-3xl text-chocolate">{% if can_bookings %}{{ stats.confirmed_bookings }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Upcoming Departures</p>
+    <p class="mt-2 font-display text-3xl text-chocolate">{% if stats.upcoming_departures is not none %}{{ stats.upcoming_departures }}{% else %}—{% endif %}</p>
+  </div>
+</div>
+
+<div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Awaiting Payment</p>
+    <p class="mt-2 font-display text-2xl text-chocolate">{% if can_bookings %}{{ stats.awaiting_payments }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Partially Paid</p>
+    <p class="mt-2 font-display text-2xl text-chocolate">{% if can_bookings %}{{ stats.partially_paid }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Total Invoiced</p>
+    <p class="mt-2 font-display text-2xl text-chocolate">{% if stats.total_invoiced is not none %}{{ company_currency }} {{ '%.2f'|format(stats.total_invoiced) }}{% else %}—{% endif %}</p>
+  </div>
+  <div class="admin-card">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Outstanding</p>
+    <p class="mt-2 font-display text-2xl text-gold">{% if stats.outstanding is not none %}{{ company_currency }} {{ '%.2f'|format(stats.outstanding) }}{% else %}—{% endif %}</p>
+  </div>
+</div>
+
+{% if can_bookings %}
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate">Booking Trends (14 days)</h2>
+    {% set max_val = trend_values|max if trend_values else 1 %}
+    {% set max_val = max_val if max_val > 0 else 1 %}
+    <div class="mt-6 flex h-40 items-end gap-1.5">
+      {% for label in trend_labels %}
+      {% set value = trend_values[loop.index0] %}
+      <div class="flex h-full flex-1 flex-col items-center justify-end gap-1">
+        <span class="text-xs text-ink-muted">{{ value }}</span>
+        <div class="w-full flex-1 flex items-end">
+          {% set bar_h = (value / max_val * 100)|int %}
+          <div class="w-full rounded-t bg-gold transition-all"
+               style="height: {% if value > 0 %}{{ 4 if bar_h < 4 else bar_h }}{% else %}0{% endif %}%;"></div>
+        </div>
+        <span class="text-[10px] text-ink-muted truncate w-full text-center">{{ label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if payment_status %}
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate">Payment Status</h2>
+    {% set pay_total = payment_status.values()|sum %}
+    {% set pay_total = pay_total if pay_total > 0 else 1 %}
+    <div class="mt-6 space-y-4">
+      {% for status, count in payment_status.items() %}
+      <div>
+        <div class="mb-1 flex justify-between text-sm">
+          <span class="text-ink-muted">{{ status|replace('_', ' ')|title }}</span>
+          <span class="font-medium text-chocolate">{{ count }}</span>
+        </div>
+        <div class="h-2 overflow-hidden rounded-full bg-cream">
+          <div class="h-full rounded-full bg-gold" style="width: {{ (count / pay_total * 100)|int }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if popular_tours %}
+<div class="mt-6 admin-card">
+  <h2 class="font-display text-lg text-chocolate mb-4">Popular Tours</h2>
+  <ul class="space-y-2">
+    {% for name, total in popular_tours %}
+    <li class="flex justify-between text-sm border-b border-chocolate/5 py-2">
+      <span>{{ name }}</span>
+      <span class="font-medium text-chocolate">{{ total }} booking(s)</span>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if recent_bookings %}
+<div class="mt-6 admin-card overflow-x-auto">
+  <h2 class="font-display text-lg text-chocolate mb-4">Recent Bookings</h2>
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Reference</th>
+        <th>Customer</th>
+        <th>Status</th>
+        <th>Payment</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for booking in recent_bookings %}
+      <tr>
+        <td class="font-medium">{{ booking.reference }}</td>
+        <td>{{ booking.customer.full_name if booking.customer else '—' }}</td>
+        <td>{{ booking.booking_status }}</td>
+        <td>{{ booking.payment_status }}</td>
+        <td class="text-right">
+          <a href="{{ url_for('admin.bookings_detail', booking_id=booking.id) }}" class="text-sm text-gold hover:underline">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% else %}
+<div class="mt-6 admin-card">
+  <p class="text-sm text-ink-muted">Your role does not include booking or finance overview widgets. Use the sidebar to open areas you can access.</p>
+</div>
+{% endif %}
+{% endblock %}

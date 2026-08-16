@@ -1,0 +1,103 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Edit Service — {{ company_name }}{% endblock %}
+{% block page_title %}Edit Service{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Update service details and booking settings</p>{% endblock %}
+
+{% block admin_content %}
+<div class="mx-auto max-w-3xl">
+  <div class="admin-card">
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {{ form.hidden_tag() }}
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          {{ form.name.label(class_='label') }}
+          {{ form.name(class_='input-field') }}
+        </div>
+        <div class="sm:col-span-2">
+          {{ form.short_description.label(class_='label') }}
+          {{ form.short_description(class_='input-field') }}
+        </div>
+        <div class="sm:col-span-2">
+          {{ form.description.label(class_='label') }}
+          {{ form.description(class_='input-field', rows=3) }}
+        </div>
+        <div class="sm:col-span-2">
+          {{ form.overview.label(class_='label') }}
+          {{ form.overview(class_='input-field', rows=4) }}
+        </div>
+        <div>
+          {{ form.highlights.label(class_='label') }}
+          {{ form.highlights(class_='input-field', rows=5) }}
+        </div>
+        <div>
+          {{ form.what_is_included.label(class_='label') }}
+          {{ form.what_is_included(class_='input-field', rows=5) }}
+        </div>
+        <div>
+          {{ form.how_it_works.label(class_='label') }}
+          {{ form.how_it_works(class_='input-field', rows=5) }}
+        </div>
+        <div>
+          {{ form.who_its_for.label(class_='label') }}
+          {{ form.who_its_for(class_='input-field', rows=5) }}
+        </div>
+        <div class="sm:col-span-2">
+          {{ form.important_notes.label(class_='label') }}
+          {{ form.important_notes(class_='input-field', rows=3) }}
+        </div>
+        <div>
+          {{ form.icon_image.label(class_='label') }}
+          {% if service.icon_image %}
+          <img src="{{ url_for('static', filename=service.icon_image) }}" alt="" class="mb-2 h-16 w-16 rounded-md object-cover border border-chocolate/10">
+          {% endif %}
+          {{ form.icon_image(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.hero_image.label(class_='label') }}
+          {% if service.hero_image %}
+          <img src="{{ url_for('static', filename=service.hero_image) }}" alt="" class="mb-2 h-16 w-28 rounded-md object-cover border border-chocolate/10">
+          {% endif %}
+          {{ form.hero_image(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.seo_title.label(class_='label') }}
+          {{ form.seo_title(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.seo_description.label(class_='label') }}
+          {{ form.seo_description(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.sort_order.label(class_='label') }}
+          {{ form.sort_order(class_='input-field') }}
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_bookable(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_bookable.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        {{ form.submit(class_='btn-primary') }}
+        <a href="{{ url_for('admin.services_list') }}" class="btn-outline">Cancel</a>
+        {% if service.is_published %}
+        <a href="{{ url_for('public.service_detail', slug=service.slug) }}" class="btn-ghost" target="_blank" rel="noopener">View public page</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Departures — {{ company_name }}{% endblock %}
+{% block page_title %}Departures{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <form method="get" class="flex gap-2">
+    <select name="tour" class="input-field w-auto" onchange="this.form.submit()">
+      <option value="">All tours</option>
+      {% for t in tours %}
+      <option value="{{ t.id }}" {% if selected_tour == t.id %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% if current_user.has_permission('departures.create') %}
+  <a href="{{ url_for('admin.departures_create') }}" class="btn-primary">Add Departure</a>
+  {% endif %}
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if departures %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Tour</th>
+        <th>Departure</th>
+        <th>Return</th>
+        <th>Capacity</th>
+        <th>Adult Price</th>
+        <th>Status</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for dep in departures %}
+      <tr class="hover:bg-cream/50">
+        <td class="max-w-[180px] truncate">{{ dep.tour.name if dep.tour else '—' }}</td>
+        <td>{{ dep.departure_date.strftime('%d %b %Y') }}</td>
+        <td>{{ dep.return_date.strftime('%d %b %Y') if dep.return_date else '—' }}</td>
+        <td>
+          <span class="text-ink">{{ dep.booked_seats }}</span>
+          <span class="text-ink-muted">/ {{ dep.capacity }}</span>
+        </td>
+        <td>{{ dep.tour.currency if dep.tour else company_currency }} {{ '%.2f'|format(dep.price_adult) }}</td>
+        <td>
+          {% if dep.status == 'OPEN' %}<span class="badge-success">Open</span>
+          {% elif dep.status == 'CLOSED' %}<span class="badge-neutral">Closed</span>
+          {% elif dep.status == 'CANCELLED' %}<span class="badge-danger">Cancelled</span>
+          {% else %}<span class="badge-info">{{ dep.status|title }}</span>{% endif %}
+        </td>
+        <td class="text-right">
+          {% if current_user.has_permission('departures.update') %}
+          <a href="{{ url_for('admin.departures_edit', departure_id=dep.id) }}" class="text-sm text-gold hover:underline">Edit</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No departures scheduled</p>
+    <p class="mt-1 text-sm text-ink-muted">Add departure dates for your tours.</p>
+    {% if current_user.has_permission('departures.create') %}
+    <a href="{{ url_for('admin.departures_create') }}" class="btn-primary mt-4 inline-flex">Add Departure</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Reports — {{ company_name }}{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Financial and operational summaries</p>{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate">Outstanding Receivables</h2>
+    <p class="mt-3 font-display text-4xl text-gold">{{ company_currency }} {{ '%.2f'|format(outstanding) }}</p>
+    <p class="mt-1 text-sm text-ink-muted">Unpaid and partially paid invoices</p>
+  </div>
+
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate mb-4">Bookings by Status</h2>
+    {% if by_status %}
+    {% set status_total = namespace(n=0) %}
+    {% for status, count in by_status %}{% set status_total.n = status_total.n + count %}{% endfor %}
+    {% set status_max = status_total.n if status_total.n > 0 else 1 %}
+    <div class="space-y-3">
+      {% for status, count in by_status %}
+      <div>
+        <div class="mb-1 flex justify-between text-sm">
+          <span class="text-ink-muted">{{ status|replace('_', ' ')|title }}</span>
+          <span class="font-medium">{{ count }}</span>
+        </div>
+        <div class="h-2 overflow-hidden rounded-full bg-cream">
+          <div class="h-full rounded-full bg-chocolate" style="width: {{ (count / status_max * 100)|int }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-ink-muted">No booking data.</p>
+    {% endif %}
+  </div>
+
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate mb-4">Payments by Method</h2>
+    {% if payment_by_method %}
+    <table class="table-admin">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th class="text-right">Total Collected</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-chocolate/5">
+        {% for method, total in payment_by_method %}
+        <tr>
+          <td>{{ method }}</td>
+          <td class="text-right font-medium">{{ company_currency }} {{ '%.2f'|format(total) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-sm text-ink-muted">No payment data.</p>
+    {% endif %}
+  </div>
+
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate mb-4">Top Tours by Bookings</h2>
+    {% if top_tours %}
+    <table class="table-admin">
+      <thead>
+        <tr>
+          <th>Tour</th>
+          <th class="text-right">Bookings</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-chocolate/5">
+        {% for name, count in top_tours %}
+        <tr>
+          <td>{{ name }}</td>
+          <td class="text-right"><span class="badge-info">{{ count }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-sm text-ink-muted">No tour booking data.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

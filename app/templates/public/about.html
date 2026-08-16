@@ -1,0 +1,147 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'About Us' }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "About Us",
+  eyebrow="Est. 2015",
+  subtitle=company_tagline,
+  image=page_hero_image()
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page">
+    <div class="mx-auto max-w-3xl space-y-6 text-ink-muted leading-relaxed">
+      <p class="text-lg text-ink">
+        Allied Tours &amp; Travel Ltd was founded in 2015 and has grown to be the best one-stop travel shop of choice for individual travellers, corporates, families, groups, and business travellers.
+      </p>
+      <p>
+        We offer tailor-made travel solutions and personalised 24-hour service to our esteemed clients — from the first enquiry through booking, travel, and return home.
+      </p>
+    </div>
+
+    {# Vision & Mission #}
+    <div class="mt-16 grid gap-8 md:grid-cols-2">
+      <div class="rounded-xl border border-chocolate/10 bg-white p-8 shadow-card">
+        <p class="text-sm font-semibold uppercase tracking-widest text-gold">Vision</p>
+        <h2 class="mt-3 font-display text-2xl text-chocolate">Our Vision</h2>
+        <p class="mt-4 leading-relaxed text-ink-muted">
+          To be the most trusted and preferred travel partner, turning every journey into a lifelong memory.
+        </p>
+      </div>
+      <div class="rounded-xl border border-chocolate/10 bg-white p-8 shadow-card">
+        <p class="text-sm font-semibold uppercase tracking-widest text-gold">Mission</p>
+        <h2 class="mt-3 font-display text-2xl text-chocolate">Our Mission</h2>
+        <p class="mt-4 leading-relaxed text-ink-muted">
+          To provide safe, high-quality, and unforgettable travel experiences through expert planning and warm customer care.
+        </p>
+      </div>
+    </div>
+
+    {# Our Tours #}
+    <div class="mt-20">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="text-sm font-semibold uppercase tracking-widest text-gold">What we offer</p>
+        <h2 class="mt-2 font-display text-3xl md:text-4xl">Our Tours</h2>
+        <p class="mt-4 text-ink-muted">
+          Every journey is shaped around your people, your pace, and your purpose — whether you are travelling for leisure, family time, or business.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">Safari &amp; Wildlife</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Classic game drives and wilderness escapes across Kenya’s most celebrated parks and reserves.
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">Coastal Getaways</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Beach holidays and coastal extensions that pair beautifully with safari itineraries.
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">Family &amp; Group Travel</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Carefully paced plans for families, friends, and groups — with logistics handled end to end.
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">Corporate &amp; Business</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Reliable arrangements for corporate travellers and business trips, with responsive support when plans change.
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">Tailor-Made Journeys</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Custom itineraries built around your dates, budget, and interests — not a one-size-fits-all package.
+          </p>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-display text-xl font-semibold text-chocolate">24-Hour Support</h3>
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+            Personalised assistance around the clock, so help is available before and during your travels.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {# Contact strip #}
+    <div class="mt-20 rounded-xl chocolate-section p-8 md:p-10">
+      <div class="grid gap-8 md:grid-cols-2 md:items-center">
+        <div>
+          <h2 class="font-display text-2xl text-white md:text-3xl">Visit or get in touch</h2>
+          <p class="mt-3 text-cream/80">We are based in Nairobi and ready to help you plan your next journey.</p>
+        </div>
+        <ul class="space-y-3 text-sm text-cream/90">
+          {% if company_office %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold">Office</span>
+            {{ company_office }}
+          </li>
+          {% endif %}
+          {% if company_address %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold">Postal address</span>
+            {{ company_address }}
+          </li>
+          {% endif %}
+          {% if company_email %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold">Email</span>
+            <a href="mailto:{{ company_email }}" class="hover:text-gold">{{ company_email }}</a>
+          </li>
+          {% endif %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold">Telephone</span>
+            {% if company_phone %}
+            <a href="tel:{{ company_phone|replace(' ', '') }}" class="hover:text-gold">{{ company_phone }}</a>
+            {% endif %}
+            {% if company_phone and company_phone_secondary %}<span class="text-cream/50"> · </span>{% endif %}
+            {% if company_phone_secondary %}
+            <a href="tel:{{ company_phone_secondary|replace(' ', '') }}" class="hover:text-gold">{{ company_phone_secondary }}</a>
+            {% endif %}
+          </li>
+          <li>
+            <span class="mb-2 block text-xs font-semibold uppercase tracking-wider text-gold">Follow us</span>
+            {% set social_variant = 'dark' %}
+            {% include "components/social_links.html" %}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-16 text-center">
+      <h2 class="font-display text-2xl md:text-3xl">Ready to explore with us?</h2>
+      <div class="mt-6 flex flex-wrap justify-center gap-4">
+        <a href="{{ url_for('public.tours') }}" class="btn-primary">View Tours</a>
+        <a href="{{ url_for('public.contact') }}" class="btn-outline">Get in Touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

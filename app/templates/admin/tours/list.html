@@ -1,0 +1,89 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Tours — {{ company_name }}{% endblock %}
+{% block page_title %}Tours{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <form method="get" class="flex flex-wrap gap-2">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search tours…" class="input-field w-full sm:w-64">
+    <select name="status" class="input-field w-auto" onchange="this.form.submit()">
+      <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+      <option value="published" {% if status == 'published' %}selected{% endif %}>Published</option>
+      <option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option>
+    </select>
+    <button type="submit" class="btn-outline">Filter</button>
+  </form>
+  {% if current_user.has_permission('tours.create') %}
+  <a href="{{ url_for('admin.tours_create') }}" class="btn-primary">Add Tour</a>
+  {% endif %}
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if tours %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Tour</th>
+        <th>Destination</th>
+        <th>Duration</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for tour in tours %}
+      <tr class="hover:bg-cream/50">
+        <td>
+          <p class="font-medium text-chocolate">{{ tour.name }}</p>
+          <p class="text-xs text-ink-muted">{{ tour.slug }}</p>
+        </td>
+        <td>{{ tour.destination.name if tour.destination else '—' }}</td>
+        <td>{{ tour.duration_days }}d / {{ tour.duration_nights }}n</td>
+        <td>{{ tour.currency }} {{ '%.2f'|format(tour.starting_price) }}</td>
+        <td>
+          {% if tour.is_published %}<span class="badge-success">Published</span>{% else %}<span class="badge-neutral">Draft</span>{% endif %}
+          {% if tour.is_featured %}<span class="badge-info ml-1">Featured</span>{% endif %}
+        </td>
+        <td class="text-right whitespace-nowrap">
+          {% if current_user.has_permission('tours.update') %}
+          <a href="{{ url_for('admin.tours_edit', tour_id=tour.id) }}" class="text-sm text-gold hover:underline">Edit</a>
+          {% endif %}
+          {% if current_user.has_permission('tours.delete') %}
+          <form method="post" action="{{ url_for('admin.tours_archive', tour_id=tour.id) }}" class="inline ml-2" onsubmit="return confirm('Archive this tour?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-sm text-red-600 hover:underline">Archive</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagination.pages > 1 %}
+  <div class="mt-4 flex items-center justify-between border-t border-chocolate/10 pt-4 text-sm">
+    <span class="text-ink-muted">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('admin.tours_list', page=pagination.prev_num, q=q, status=status) }}" class="btn-outline py-1.5 px-3">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('admin.tours_list', page=pagination.next_num, q=q, status=status) }}" class="btn-outline py-1.5 px-3">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No tours found</p>
+    <p class="mt-1 text-sm text-ink-muted">{% if q %}Try a different search term.{% else %}Create your first tour to get started.{% endif %}</p>
+    {% if current_user.has_permission('tours.create') and not q %}
+    <a href="{{ url_for('admin.tours_create') }}" class="btn-primary mt-4 inline-flex">Add Tour</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

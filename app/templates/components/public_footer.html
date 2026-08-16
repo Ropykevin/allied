@@ -1,0 +1,91 @@
+<footer class="chocolate-section text-cream" role="contentinfo">
+  <div class="container-page section pb-8">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+      {# Brand #}
+      <div class="space-y-4">
+        <a href="{{ url_for('public.home') }}" class="inline-block">
+          <img
+            src="{{ url_for('static', filename='assets/brand/logo-light.png') }}"
+            alt="{{ company_name }}"
+            class="h-14 w-auto object-contain md:h-16"
+            width="220"
+            height="64"
+          >
+        </a>
+        <p class="text-sm leading-relaxed text-cream/80">{{ company_tagline }}</p>
+        <p class="text-sm text-cream/70">Founded in 2015. Tailor-made travel for individuals, families, groups, corporates, and business travellers.</p>
+        {% set social_variant = 'dark' %}
+        {% include "components/social_links.html" %}
+      </div>
+
+      {# Explore #}
+      <div>
+        <h2 class="mb-4 font-display text-lg font-semibold text-gold">Explore</h2>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="{{ url_for('public.tours') }}" class="text-cream/80 hover:text-gold">Tours</a></li>
+          <li><a href="{{ url_for('public.destinations') }}" class="text-cream/80 hover:text-gold">Destinations</a></li>
+          <li><a href="{{ url_for('public.gallery') }}" class="text-cream/80 hover:text-gold">Gallery</a></li>
+          <li><a href="{{ url_for('public.blog') }}" class="text-cream/80 hover:text-gold">Blog</a></li>
+          <li><a href="{{ url_for('public.services') }}" class="text-cream/80 hover:text-gold">Services</a></li>
+          <li><a href="{{ url_for('public.partners') }}" class="text-cream/80 hover:text-gold">Partners</a></li>
+          <li><a href="{{ url_for('public.about') }}" class="text-cream/80 hover:text-gold">About Us</a></li>
+          <li><a href="{{ url_for('public.faqs') }}" class="text-cream/80 hover:text-gold">FAQs</a></li>
+        </ul>
+      </div>
+
+      {# Contact #}
+      <div>
+        <h2 class="mb-4 font-display text-lg font-semibold text-gold">Contact</h2>
+        <ul class="space-y-2.5 text-sm text-cream/80">
+          {% if company_office %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold/80">Office</span>
+            {{ company_office }}
+          </li>
+          {% endif %}
+          {% if company_address %}
+          <li>
+            <span class="block text-xs font-semibold uppercase tracking-wider text-gold/80">Postal</span>
+            {{ company_address }}
+          </li>
+          {% endif %}
+          {% if company_email %}
+          <li>
+            <a href="mailto:{{ company_email }}" class="hover:text-gold">{{ company_email }}</a>
+          </li>
+          {% endif %}
+          {% if company_phone %}
+          <li>
+            <a href="tel:{{ company_phone|replace(' ', '') }}" class="hover:text-gold">{{ company_phone }}</a>
+          </li>
+          {% endif %}
+          {% if company_phone_secondary %}
+          <li>
+            <a href="tel:{{ company_phone_secondary|replace(' ', '') }}" class="hover:text-gold">{{ company_phone_secondary }}</a>
+          </li>
+          {% endif %}
+          <li>
+            <a href="{{ url_for('public.contact') }}" class="font-medium text-gold hover:text-gold-soft">Send a message</a>
+          </li>
+          <li>
+            <a href="{{ url_for('public.check_booking') }}" class="hover:text-gold">Check your booking</a>
+          </li>
+        </ul>
+      </div>
+
+      {# Legal #}
+      <div>
+        <h2 class="mb-4 font-display text-lg font-semibold text-gold">Legal</h2>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="{{ url_for('public.privacy') }}" class="text-cream/80 hover:text-gold">Privacy Policy</a></li>
+          <li><a href="{{ url_for('public.terms') }}" class="text-cream/80 hover:text-gold">Terms &amp; Conditions</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-8 text-sm text-cream/60 md:flex-row">
+      <p>&copy; 2026 {{ company_name }}. All rights reserved.</p>
+      <p class="text-xs">Safaris, cultural tours &amp; bespoke travel across East Africa.</p>
+    </div>
+  </div>
+</footer>

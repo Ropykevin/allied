@@ -1,0 +1,56 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Edit {{ role.name }} — {{ company_name }}{% endblock %}
+{% block page_title %}Edit Role: {{ role.name }}{% endblock %}
+{% block page_subtitle %}
+<p class="text-sm text-ink-muted">
+  Restrict or expand what users with this role can access.
+  {% if role.is_system %}<span class="badge-info ml-2">System Role</span>{% endif %}
+</p>
+{% endblock %}
+
+{% block admin_content %}
+<form method="post" class="space-y-6">
+  {{ form.hidden_tag() }}
+
+  {% if role.slug == 'super-admin' %}
+  <div class="admin-card border border-gold/30 bg-gold/10">
+    <p class="text-sm text-chocolate">
+      Super Admin always keeps admin-user management permissions so the portal cannot be locked out.
+    </p>
+  </div>
+  {% endif %}
+
+  {% for category, perms in grouped_permissions.items() %}
+  <div class="admin-card">
+    <h2 class="font-display text-lg text-chocolate mb-4 capitalize">{{ category.replace('_', ' ') }}</h2>
+    <div class="grid gap-3 sm:grid-cols-2">
+      {% for perm in perms %}
+      <label class="flex items-start gap-3 rounded-lg border border-chocolate/10 bg-cream/40 p-3 cursor-pointer hover:border-gold/40">
+        <input
+          type="checkbox"
+          name="permission_codes"
+          value="{{ perm.code }}"
+          class="mt-1 rounded border-chocolate/20 text-gold focus:ring-gold"
+          {% if perm.code in selected_codes %}checked{% endif %}
+          {% if role.slug == 'super-admin' and perm.code.startswith('admins.') %}checked{% endif %}
+        >
+        <span>
+          <span class="block text-sm font-medium text-chocolate">{{ perm.name }}</span>
+          <span class="block text-xs text-ink-muted">{{ perm.code }}</span>
+          {% if perm.description %}
+          <span class="mt-1 block text-xs text-ink-muted">{{ perm.description }}</span>
+          {% endif %}
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.roles_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

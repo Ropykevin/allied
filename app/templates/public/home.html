@@ -1,0 +1,523 @@
+{% extends "public/layout.html" %}
+
+{% block title %}{{ seo.title if seo else company_name }}{% endblock %}
+
+{% block content %}
+{# ── Hero ── #}
+<section
+  class="relative min-h-[88vh] flex items-end overflow-hidden"
+  aria-labelledby="hero-heading"
+  data-hero-slideshow
+  data-hero-interval="6000"
+>
+  <div class="absolute inset-0" aria-hidden="true" data-hero-slides>
+    {% if hero_images %}
+      {% for image in hero_images %}
+      <img
+        src="{{ url_for('static', filename=image.image_path) }}"
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out {% if loop.first %}opacity-100{% else %}opacity-0{% endif %}"
+        data-hero-slide
+        {% if loop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+      >
+      {% endfor %}
+    {% else %}
+      <img
+        src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1920&q=80"
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover opacity-100"
+        data-hero-slide
+        fetchpriority="high"
+      >
+    {% endif %}
+  </div>
+  <div class="hero-overlay absolute inset-0 z-[1]" aria-hidden="true"></div>
+
+  <div class="container-page relative z-10 pb-16 pt-32 md:pb-24 md:pt-40">
+    <p class="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-gold">{{ company_name }}</p>
+    <p class="mb-5 text-base text-cream/85 md:text-lg">{{ company_tagline }}</p>
+    <h1 id="hero-heading" class="max-w-4xl font-display text-4xl font-bold leading-[1.1] text-white text-balance md:text-6xl lg:text-7xl">
+      Discover Africa with journeys crafted for wonder
+    </h1>
+    <p class="mt-6 max-w-xl text-base leading-relaxed text-cream/80 md:text-lg">
+      Browse curated tours, request your booking, and travel with a team that handles every detail.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{{ url_for('public.tours') }}" class="btn-gold">Explore Tours</a>
+      <a href="{{ url_for('public.contact') }}" class="btn-outline border-cream/35 text-cream hover:border-gold hover:text-gold">Contact Us</a>
+    </div>
+    {% if hero_images and hero_images|length > 1 %}
+    <div class="mt-10 flex gap-2" data-hero-dots aria-hidden="true">
+      {% for image in hero_images %}
+      <button
+        type="button"
+        class="h-1 w-7 rounded-full transition {% if loop.first %}bg-gold{% else %}bg-cream/35{% endif %}"
+        data-hero-dot
+        data-hero-index="{{ loop.index0 }}"
+        aria-label="Show gallery image {{ loop.index }}"
+      ></button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{# ── Who We Are ── #}
+<section class="section surface-warm relative overflow-hidden" aria-labelledby="who-heading" data-reveal>
+  <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 bg-gradient-to-l from-gold/10 to-transparent" aria-hidden="true"></div>
+  <div class="container-page relative">
+    <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-6">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Est. 2015</p>
+        <h2 id="who-heading" class="mt-3 font-display text-3xl md:text-4xl lg:text-5xl">Who We Are</h2>
+        <p class="mt-6 text-lg leading-relaxed text-ink">
+          Allied Tours &amp; Travel Ltd is the one-stop travel shop of choice for individuals, families, groups, corporates, and business travellers.
+        </p>
+        <p class="mt-4 leading-relaxed text-ink-muted">
+          We craft tailor-made journeys with personalised 24-hour care — from the first enquiry through booking, travel, and your return home.
+        </p>
+
+        <ul class="mt-8 grid gap-4 sm:grid-cols-3">
+          <li class="border-t border-gold/40 pt-4">
+            <p class="font-display text-2xl font-semibold text-chocolate">2015</p>
+            <p class="mt-1 text-sm text-ink-muted">Founded in Nairobi</p>
+          </li>
+          <li class="border-t border-gold/40 pt-4">
+            <p class="font-display text-2xl font-semibold text-chocolate">24hr</p>
+            <p class="mt-1 text-sm text-ink-muted">Personalised care</p>
+          </li>
+          <li class="border-t border-gold/40 pt-4">
+            <p class="font-display text-2xl font-semibold text-chocolate">Bespoke</p>
+            <p class="mt-1 text-sm text-ink-muted">Tailor-made plans</p>
+          </li>
+        </ul>
+
+        <div class="mt-10">
+          <a href="{{ url_for('public.about') }}" class="btn-primary">Learn More About Us</a>
+        </div>
+      </div>
+
+      <div class="relative lg:col-span-6">
+        {% set who_image = (gallery[0].image_path if gallery else none) or (hero_images[0].image_path if hero_images else none) %}
+        <div class="relative aspect-[4/5] overflow-hidden sm:aspect-[5/4] lg:aspect-[4/5]">
+          {% if who_image %}
+          <img
+            src="{{ url_for('static', filename=who_image) }}"
+            alt="Travellers experiencing Africa with Allied Tours & Travel"
+            class="h-full w-full object-cover"
+            loading="lazy"
+          >
+          {% else %}
+          <img
+            src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80"
+            alt="African savannah landscape"
+            class="h-full w-full object-cover"
+            loading="lazy"
+          >
+          {% endif %}
+          <div class="absolute inset-0 bg-gradient-to-t from-chocolate/50 via-transparent to-transparent" aria-hidden="true"></div>
+          <p class="absolute bottom-0 left-0 right-0 p-6 font-display text-xl text-white md:text-2xl">
+            Your one-stop travel shop.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Featured Tours ── #}
+{% if featured_tours %}
+<section class="section surface-sand" aria-labelledby="featured-tours-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Handpicked</p>
+        <h2 id="featured-tours-heading" class="mt-3 font-display text-3xl md:text-4xl">Featured Tours</h2>
+        <p class="mt-3 text-ink-muted">Signature journeys ready for your next adventure.</p>
+      </div>
+      <a href="{{ url_for('public.tours') }}" class="btn-outline shrink-0">View All Tours</a>
+    </div>
+
+    <div class="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+      {% for tour in featured_tours %}
+      <article class="group flex flex-col overflow-hidden rounded-xl border border-chocolate/10 bg-cream/90 shadow-card transition duration-300 hover:border-gold/50 hover:shadow-soft">
+        <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="relative block aspect-[4/3] overflow-hidden">
+          {% if tour.hero_image %}
+          <img
+            src="{{ url_for('static', filename=tour.hero_image) }}"
+            alt="{{ tour.name }}"
+            class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            loading="lazy"
+          >
+          {% else %}
+          <img
+            src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80"
+            alt="{{ tour.name }}"
+            class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            loading="lazy"
+          >
+          {% endif %}
+          <div class="absolute inset-0 bg-gradient-to-t from-chocolate/55 via-transparent to-transparent" aria-hidden="true"></div>
+          {% if tour.destination %}
+          <span class="absolute bottom-3 left-3 badge-info">{{ tour.destination.name }}</span>
+          {% endif %}
+        </a>
+        <div class="flex flex-1 flex-col p-5 md:p-6">
+          <h3 class="font-display text-xl font-semibold leading-snug">
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="hover:text-gold">{{ tour.name }}</a>
+          </h3>
+          <p class="mt-2 text-sm text-ink-muted">
+            {{ tour.duration_days }} day{% if tour.duration_days != 1 %}s{% endif %}
+            {% if tour.duration_nights %} · {{ tour.duration_nights }} night{% if tour.duration_nights != 1 %}s{% endif %}{% endif %}
+          </p>
+          {% if tour.short_description %}
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-ink-muted line-clamp-2">{{ tour.short_description }}</p>
+          {% endif %}
+          <div class="mt-5 flex items-end justify-between gap-3 border-t border-chocolate/8 pt-4">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-ink-muted">From</p>
+              <p class="font-display text-xl font-semibold text-chocolate">
+                {{ tour.currency }} {{ "{:,.0f}".format(tour.starting_price) }}
+              </p>
+            </div>
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="btn-primary text-xs px-4 py-2">View Tour</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── Destinations ── #}
+{% if destinations %}
+<section class="section surface-warm" aria-labelledby="destinations-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-12 max-w-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Where to next</p>
+      <h2 id="destinations-heading" class="mt-3 font-display text-3xl md:text-4xl">Popular Destinations</h2>
+      <p class="mt-3 text-ink-muted">Landscapes and regions that define our signature experiences.</p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+      {% for dest in destinations %}
+      <a
+        href="{{ url_for('public.destination_detail', slug=dest.slug) }}"
+        class="group relative aspect-[4/5] overflow-hidden {% if loop.index == 1 %}sm:aspect-[5/4] lg:col-span-1{% endif %}"
+      >
+        {% if dest.hero_image %}
+        <img
+          src="{{ url_for('static', filename=dest.hero_image) }}"
+          alt="{{ dest.name }}"
+          class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          loading="lazy"
+        >
+        {% else %}
+        <img
+          src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80"
+          alt="{{ dest.name }}"
+          class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          loading="lazy"
+        >
+        {% endif %}
+        <div class="absolute inset-0 bg-gradient-to-t from-chocolate/85 via-chocolate/25 to-transparent transition duration-300 group-hover:from-chocolate/90" aria-hidden="true"></div>
+        <div class="absolute inset-x-0 bottom-0 p-5 md:p-6">
+          {% if dest.country %}
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gold">{{ dest.country }}</p>
+          {% endif %}
+          <h3 class="mt-1 font-display text-2xl font-semibold text-white">{{ dest.name }}</h3>
+          {% if dest.short_description %}
+          <p class="mt-2 max-w-sm text-sm text-cream/80 line-clamp-2 opacity-90">{{ dest.short_description }}</p>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="mt-10">
+      <a href="{{ url_for('public.destinations') }}" class="btn-outline">All Destinations</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── Services ── #}
+{% if services %}
+<section class="section surface-mist" aria-labelledby="services-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-12 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">What we offer</p>
+        <h2 id="services-heading" class="mt-3 font-display text-3xl md:text-4xl">Our Services</h2>
+        <p class="mt-3 text-ink-muted">Air ticketing, visa support, and travel insurance — handled with care.</p>
+      </div>
+      <a href="{{ url_for('public.services') }}" class="btn-outline shrink-0">All Services</a>
+    </div>
+
+    <div class="grid gap-px overflow-hidden rounded-xl border border-chocolate/15 bg-chocolate/15 sm:grid-cols-2 lg:grid-cols-3">
+      {% for service in services %}
+      <article class="bg-cream-soft/95 p-7 transition duration-300 hover:bg-cream-deep/70 md:p-8">
+        {% if service.icon_image %}
+        <img
+          src="{{ url_for('static', filename=service.icon_image) }}"
+          alt=""
+          class="mb-5 h-12 w-12 rounded-md object-cover"
+          loading="lazy"
+        >
+        {% else %}
+        <div class="mb-5 flex h-11 w-11 items-center justify-center rounded-md bg-chocolate font-display text-lg font-semibold text-gold" aria-hidden="true">
+          {{ service.name[:1]|upper }}
+        </div>
+        {% endif %}
+        <h3 class="font-display text-xl font-semibold">
+          <a href="{{ url_for('public.service_detail', slug=service.slug) }}" class="hover:text-gold">{{ service.name }}</a>
+        </h3>
+        {% if service.short_description %}
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ service.short_description }}</p>
+        {% endif %}
+        <div class="mt-4">
+          <a href="{{ url_for('public.service_detail', slug=service.slug) }}" class="text-sm font-medium text-gold hover:underline">Learn more</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── How It Works ── #}
+<section class="section chocolate-section text-cream" aria-labelledby="how-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-12 max-w-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Simple process</p>
+      <h2 id="how-heading" class="mt-3 font-display text-3xl text-white md:text-4xl">How It Works</h2>
+      <p class="mt-3 text-cream/75">Book with clarity — no payment at request stage.</p>
+    </div>
+
+    <ol class="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-6">
+      {% set steps = [
+        ('Browse Tours', 'Explore published tours and choose a departure that fits.'),
+        ('Submit Request', 'Share your details. No payment is required at this step.'),
+        ('We Review', 'We confirm availability and prepare your quote.'),
+        ('Receive Invoice', 'Get a clear invoice with payment instructions.'),
+        ('Travel', 'Once confirmed, we handle the logistics — you enjoy the journey.')
+      ] %}
+      {% for title, copy in steps %}
+      <li class="relative">
+        <span class="flex h-11 w-11 items-center justify-center rounded-full border border-gold/40 font-display text-lg font-bold text-gold" aria-hidden="true">{{ loop.index }}</span>
+        <h3 class="mt-5 font-display text-lg font-semibold text-white">{{ title }}</h3>
+        <p class="mt-2 text-sm leading-relaxed text-cream/70">{{ copy }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{# ── Why Choose Allied ── #}
+<section class="section surface-warm" aria-labelledby="why-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-12 max-w-2xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Our promise</p>
+      <h2 id="why-heading" class="mt-3 font-display text-3xl md:text-4xl">Why Choose Allied</h2>
+    </div>
+
+    <div class="grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
+      <div class="border-l-2 border-gold pl-5">
+        <h3 class="font-display text-lg font-semibold">Experienced Professionals</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">A dedicated team with deep destination knowledge across Kenya and beyond.</p>
+      </div>
+      <div class="border-l-2 border-gold pl-5">
+        <h3 class="font-display text-lg font-semibold">Personalized Experiences</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Itineraries shaped around your dates, travellers, and travel style.</p>
+      </div>
+      <div class="border-l-2 border-gold pl-5">
+        <h3 class="font-display text-lg font-semibold">Reliable Service</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Clear communication and dependable arrangements you can count on.</p>
+      </div>
+      <div class="border-l-2 border-gold pl-5">
+        <h3 class="font-display text-lg font-semibold">Selected Destinations</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Safaris, coastal escapes, and curated routes chosen for quality.</p>
+      </div>
+      <div class="border-l-2 border-gold pl-5 md:col-span-2 lg:col-span-1">
+        <h3 class="font-display text-lg font-semibold">Customer-Focused Support</h3>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">Personalised 24-hour care for individuals, families, groups, and corporates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ── Partners ── #}
+{% set logo_partners = partners|selectattr('logo_path')|list if partners else [] %}
+{% if logo_partners %}
+<section class="section surface-sand" aria-labelledby="partners-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Trusted network</p>
+        <h2 id="partners-heading" class="mt-3 font-display text-3xl md:text-4xl">Our Partners</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        {% if logo_partners|length > 1 %}
+        <div class="flex items-center gap-2">
+          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-prev aria-label="Previous partners">‹</button>
+          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-next aria-label="Next partners">›</button>
+        </div>
+        {% endif %}
+        <a href="{{ url_for('public.partners') }}" class="btn-outline shrink-0">View Partners</a>
+      </div>
+    </div>
+
+    <div
+      class="relative"
+      data-partner-slider
+      data-partner-interval="5000"
+      data-partner-count="{{ logo_partners|length }}"
+    >
+      <div class="overflow-hidden" data-partner-viewport>
+        <div class="flex transition-transform duration-500 ease-out" data-partner-track>
+          {% for partner in logo_partners %}
+          <div class="w-1/2 shrink-0 px-2 sm:w-1/3 lg:w-1/4 xl:w-1/5" data-partner-slide>
+            <div class="flex h-36 items-center justify-center border border-chocolate/10 bg-cream-soft px-4 py-6 sm:h-40">
+              {% set partner_url = partner.website_url|safe_url %}
+              {% if partner_url %}
+              <a href="{{ partner_url }}" target="_blank" rel="noopener noreferrer" class="block" aria-label="{{ partner.name }}">
+                <img
+                  src="{{ url_for('static', filename=partner.logo_path) }}"
+                  alt="{{ partner.name }}"
+                  class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain transition duration-300 hover:scale-105 sm:h-20 sm:max-h-24 sm:max-w-[200px]"
+                  loading="lazy"
+                >
+              </a>
+              {% else %}
+              <img
+                src="{{ url_for('static', filename=partner.logo_path) }}"
+                alt="{{ partner.name }}"
+                class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain sm:h-20 sm:max-h-24 sm:max-w-[200px]"
+                loading="lazy"
+              >
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if logo_partners|length > 1 %}
+      <div class="mt-6 flex justify-center gap-2" data-partner-dots aria-hidden="true"></div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── Testimonials ── #}
+{% if reviews %}
+<section class="section surface-mist" aria-labelledby="reviews-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Traveler stories</p>
+        <h2 id="reviews-heading" class="mt-3 font-display text-3xl md:text-4xl">What Our Travelers Say</h2>
+      </div>
+      {% if reviews|length > 1 %}
+      <div class="flex items-center gap-2">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-testimonial-prev aria-label="Previous testimonials">‹</button>
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-testimonial-next aria-label="Next testimonials">›</button>
+      </div>
+      {% endif %}
+    </div>
+
+    <div
+      class="relative"
+      data-testimonial-slider
+      data-testimonial-interval="7000"
+      data-testimonial-count="{{ reviews|length }}"
+    >
+      <div class="overflow-hidden" data-testimonial-viewport>
+        <div class="flex transition-transform duration-500 ease-out" data-testimonial-track>
+          {% for review in reviews %}
+          <blockquote class="w-full shrink-0 px-1 sm:w-1/2 sm:px-2 lg:w-1/3" data-testimonial-slide>
+            <div class="flex h-full flex-col rounded-xl border border-chocolate/10 bg-cream-soft/90 p-6 shadow-card md:p-7">
+              <div class="mb-4 flex gap-0.5 text-gold" aria-label="{{ review.rating }} out of 5 stars">
+                {% for i in range(review.rating) %}
+                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                {% endfor %}
+              </div>
+              <p class="flex-1 text-sm leading-relaxed text-ink line-clamp-6">&ldquo;{{ review.body }}&rdquo;</p>
+              <footer class="mt-5 border-t border-chocolate/8 pt-4">
+                <cite class="not-italic font-semibold text-chocolate">{{ review.customer_name }}</cite>
+                {% if review.tour %}
+                <p class="mt-0.5 text-xs text-ink-muted">{{ review.tour.name }}</p>
+                {% endif %}
+              </footer>
+            </div>
+          </blockquote>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if reviews|length > 1 %}
+      <div class="mt-7 flex justify-center gap-2" data-testimonial-dots aria-hidden="true"></div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── Gallery ── #}
+{% if gallery %}
+<section class="section surface-warm" aria-labelledby="gallery-heading" data-reveal>
+  <div class="container-page">
+    <div class="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Moments</p>
+        <h2 id="gallery-heading" class="mt-3 font-display text-3xl md:text-4xl">From the Trail</h2>
+      </div>
+      <a href="{{ url_for('public.gallery') }}" class="btn-outline shrink-0">Full Gallery</a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4" data-gallery-grid>
+      {% for image in gallery %}
+      <a
+        href="{{ url_for('static', filename=image.image_path) }}"
+        class="group relative aspect-square overflow-hidden focus-visible:outline-gold {% if loop.index == 1 %}md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-full{% endif %}"
+        data-gallery-item
+        data-gallery-index="{{ loop.index0 }}"
+        data-gallery-title="{{ image.title or '' }}"
+        data-gallery-alt="{{ image.alt_text or image.title or 'Gallery image' }}"
+        aria-label="View {{ image.title or 'gallery image' }} larger"
+      >
+        <img
+          src="{{ url_for('static', filename=image.image_path) }}"
+          alt="{{ image.alt_text or image.title }}"
+          class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+          loading="lazy"
+        >
+        <span class="pointer-events-none absolute inset-0 bg-chocolate/0 transition group-hover:bg-chocolate/25"></span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ── Final CTA ── #}
+<section class="relative overflow-hidden section chocolate-section" aria-labelledby="cta-heading" data-reveal>
+  <div class="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-gold/10 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-gold/5 blur-3xl" aria-hidden="true"></div>
+  <div class="container-page relative text-center">
+    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">{{ company_name }}</p>
+    <h2 id="cta-heading" class="mx-auto mt-4 max-w-3xl font-display text-3xl text-white md:text-5xl">
+      Ready to plan your African adventure?
+    </h2>
+    <p class="mx-auto mt-5 max-w-xl text-cream/75">
+      Browse our tours, submit a booking request, or reach out — we are with you every step of the way.
+    </p>
+    <div class="mt-10 flex flex-wrap justify-center gap-3">
+      <a href="{{ url_for('public.tours') }}" class="btn-gold">Explore Tours</a>
+      <a href="{{ url_for('public.contact') }}" class="btn-outline border-cream/35 text-cream hover:border-gold hover:text-gold">Get in Touch</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

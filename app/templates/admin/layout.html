@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block body_class %}bg-cream min-h-screen{% endblock %}
+
+{% block body %}
+<div class="flex min-h-screen" id="admin-shell">
+  {# Mobile overlay #}
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-chocolate/50 lg:hidden" aria-hidden="true"></div>
+
+  {# Sidebar #}
+  <aside id="admin-sidebar"
+         class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-chocolate text-cream transition-transform duration-200 lg:static lg:translate-x-0">
+    <div class="flex h-16 items-center gap-3 border-b border-gold/20 px-5">
+      <img src="{{ url_for('static', filename='assets/brand/logo-light.png') }}"
+           alt="{{ company_name }}" class="h-10 w-auto object-contain">
+      <span class="font-display text-lg text-gold leading-tight">Admin</span>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 py-4 text-sm" aria-label="Admin navigation">
+      <ul class="space-y-1">
+        <li>
+          <a href="{{ url_for('admin.dashboard') }}"
+             class="flex items-center gap-3 rounded-md px-3 py-2.5 {% if request.endpoint == 'admin.dashboard' %}bg-gold/20 text-gold{% else %}text-cream/80 hover:bg-chocolate-support hover:text-cream{% endif %}">
+            <svg class="h-5 w-5 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            Dashboard
+          </a>
+        </li>
+
+        {% if current_user.has_permission('tours.view') or current_user.has_permission('destinations.view') or current_user.has_permission('departures.view') %}
+        <li class="pt-3">
+          <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gold/60">Tours</p>
+          <ul class="space-y-0.5">
+            {% if current_user.has_permission('tours.view') %}
+            <li><a href="{{ url_for('admin.tours_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.tours_list', 'admin.tours_create', 'admin.tours_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">All Tours</a></li>
+            {% endif %}
+            {% if current_user.has_permission('tours.create') %}
+            <li><a href="{{ url_for('admin.tours_create') }}" class="block rounded-md px-3 py-2 text-cream/75 hover:bg-chocolate-support hover:text-cream">Add Tour</a></li>
+            {% endif %}
+            {% if current_user.has_permission('destinations.view') %}
+            <li><a href="{{ url_for('admin.destinations_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.destinations_list', 'admin.destinations_create', 'admin.destinations_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Destinations</a></li>
+            {% endif %}
+            {% if current_user.has_permission('departures.view') %}
+            <li><a href="{{ url_for('admin.departures_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.departures_list', 'admin.departures_create', 'admin.departures_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Departures</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('bookings.view') %}
+        <li class="pt-3">
+          <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gold/60">Bookings</p>
+          <ul class="space-y-0.5">
+            <li><a href="{{ url_for('admin.bookings_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.bookings_list' and request.args.get('status', 'all') == 'all' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">All</a></li>
+            <li><a href="{{ url_for('admin.bookings_list', status='NEW') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'NEW' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">New</a></li>
+            <li><a href="{{ url_for('admin.bookings_list', status='UNDER_REVIEW') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'UNDER_REVIEW' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Pending</a></li>
+            <li><a href="{{ url_for('admin.bookings_list', status='CONFIRMED') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'CONFIRMED' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Confirmed</a></li>
+            <li><a href="{{ url_for('admin.bookings_list', status='CANCELLED') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'CANCELLED' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Cancelled</a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('customers.view') %}
+        <li class="pt-3">
+          <a href="{{ url_for('admin.customers_list') }}"
+             class="flex items-center gap-3 rounded-md px-3 py-2.5 {% if request.endpoint in ['admin.customers_list', 'admin.customers_detail', 'admin.customers_edit'] %}bg-gold/20 text-gold{% else %}text-cream/80 hover:bg-chocolate-support hover:text-cream{% endif %}">
+            Customers
+          </a>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('invoices.view') %}
+        <li class="pt-3">
+          <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gold/60">Invoices</p>
+          <ul class="space-y-0.5">
+            <li><a href="{{ url_for('admin.invoices_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.invoices_list' and request.args.get('status', 'all') == 'all' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">All</a></li>
+            <li><a href="{{ url_for('admin.invoices_list', status='pending') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'pending' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Pending</a></li>
+            <li><a href="{{ url_for('admin.invoices_list', status='paid') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'paid' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Paid</a></li>
+            <li><a href="{{ url_for('admin.invoices_list', status='outstanding') }}" class="block rounded-md px-3 py-2 {% if request.args.get('status') == 'outstanding' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Outstanding</a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('payments.view') %}
+        <li class="pt-3">
+          <a href="{{ url_for('admin.payments_list') }}"
+             class="flex items-center gap-3 rounded-md px-3 py-2.5 {% if request.endpoint in ['admin.payments_list', 'admin.payments_record'] %}bg-gold/20 text-gold{% else %}text-cream/80 hover:bg-chocolate-support hover:text-cream{% endif %}">
+            Payments
+          </a>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('reports.view') %}
+        <li class="pt-3">
+          <a href="{{ url_for('admin.reports') }}"
+             class="flex items-center gap-3 rounded-md px-3 py-2.5 {% if request.endpoint == 'admin.reports' %}bg-gold/20 text-gold{% else %}text-cream/80 hover:bg-chocolate-support hover:text-cream{% endif %}">
+            Reports
+          </a>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('content.view') %}
+        <li class="pt-3">
+          <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gold/60">Content</p>
+          <ul class="space-y-0.5">
+            <li><a href="{{ url_for('admin.blog_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.blog_list', 'admin.blog_create', 'admin.blog_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Blog</a></li>
+            <li><a href="{{ url_for('admin.gallery_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.gallery_list' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Gallery</a></li>
+            <li><a href="{{ url_for('admin.reviews_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.reviews_list' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Testimonials</a></li>
+            <li><a href="{{ url_for('admin.faqs_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.faqs_list' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">FAQs</a></li>
+            <li><a href="{{ url_for('admin.services_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.services_list', 'admin.services_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Services</a></li>
+            <li><a href="{{ url_for('admin.partners_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.partners_list', 'admin.partners_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Partners</a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if current_user.has_permission('admins.view') or current_user.has_permission('settings.view') or current_user.has_permission('audit_logs.view') %}
+        <li class="pt-3">
+          <p class="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-gold/60">Administration</p>
+          <ul class="space-y-0.5">
+            {% if current_user.has_permission('admins.view') %}
+            <li><a href="{{ url_for('admin.users_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.users_list', 'admin.users_create', 'admin.users_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Admin Users</a></li>
+            <li><a href="{{ url_for('admin.roles_list') }}" class="block rounded-md px-3 py-2 {% if request.endpoint in ['admin.roles_list', 'admin.roles_edit'] %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Roles &amp; Permissions</a></li>
+            {% endif %}
+            {% if current_user.has_permission('settings.view') %}
+            <li><a href="{{ url_for('admin.settings_page') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.settings_page' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Settings</a></li>
+            {% endif %}
+            {% if current_user.has_permission('audit_logs.view') %}
+            <li><a href="{{ url_for('admin.audit_logs') }}" class="block rounded-md px-3 py-2 {% if request.endpoint == 'admin.audit_logs' %}bg-gold/20 text-gold{% else %}text-cream/75 hover:bg-chocolate-support hover:text-cream{% endif %}">Audit Logs</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <div class="border-t border-gold/20 p-4">
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit"
+                class="flex w-full items-center justify-center gap-2 rounded-md border border-gold/30 px-3 py-2 text-sm text-gold hover:bg-gold/10">
+          Logout
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  {# Main area #}
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-chocolate/10 bg-white px-4 lg:px-8">
+      <div class="flex items-center gap-3">
+        <button type="button" id="sidebar-toggle"
+                class="rounded-md p-2 text-chocolate hover:bg-cream lg:hidden"
+                aria-label="Toggle navigation">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div>
+          <h1 class="font-display text-xl text-chocolate">{% block page_title %}Dashboard{% endblock %}</h1>
+          {% block page_subtitle %}{% endblock %}
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="hidden text-right sm:block">
+          <p class="text-sm font-medium text-chocolate">{{ current_user.full_name }}</p>
+          <p class="text-xs text-ink-muted">{{ current_user.role.name if current_user.role else 'Staff' }}</p>
+        </div>
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gold/20 font-semibold text-chocolate">
+          {{ current_user.full_name[:1]|upper }}
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 lg:p-8">
+      {% include 'components/flash.html' %}
+      {% block admin_content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var toggle = document.getElementById('sidebar-toggle');
+  var sidebar = document.getElementById('admin-sidebar');
+  var overlay = document.getElementById('sidebar-overlay');
+  if (!toggle || !sidebar || !overlay) return;
+
+  function openSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+  }
+  function closeSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  }
+  toggle.addEventListener('click', function () {
+    sidebar.classList.contains('-translate-x-full') ? openSidebar() : closeSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+  window.addEventListener('resize', function () {
+    if (window.innerWidth >= 1024) closeSidebar();
+  });
+})();
+</script>
+{% block admin_scripts %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Record Payment — {{ company_name }}{% endblock %}
+{% block page_title %}Record Payment{% endblock %}
+{% block page_subtitle %}
+<p class="text-sm text-ink-muted">
+  Invoice {{ invoice.invoice_number }} · Balance: {{ invoice.currency }} {{ '%.2f'|format(invoice.balance) }}
+</p>
+{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-lg">
+  <div class="admin-card mb-6">
+    <dl class="grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <dt class="text-ink-muted">Customer</dt>
+        <dd class="font-medium text-chocolate">{{ invoice.customer.full_name if invoice.customer else '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-ink-muted">Invoice Total</dt>
+        <dd>{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</dd>
+      </div>
+      <div>
+        <dt class="text-ink-muted">Amount Paid</dt>
+        <dd>{{ invoice.currency }} {{ '%.2f'|format(invoice.amount_paid) }}</dd>
+      </div>
+      <div>
+        <dt class="text-ink-muted">Balance Due</dt>
+        <dd class="font-semibold text-gold">{{ invoice.currency }} {{ '%.2f'|format(invoice.balance) }}</dd>
+      </div>
+    </dl>
+  </div>
+
+  <form method="post" class="admin-card space-y-5">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.amount.label(class_='label') }}
+      {{ form.amount(class_='input-field') }}
+      {% for e in form.amount.errors %}<p class="mt-1 text-sm text-red-600">{{ e }}</p>{% endfor %}
+    </div>
+    <div>
+      {{ form.method.label(class_='label') }}
+      {{ form.method(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.payment_date.label(class_='label') }}
+      {{ form.payment_date(class_='input-field', type='date') }}
+    </div>
+    <div>
+      {{ form.transaction_reference.label(class_='label') }}
+      {{ form.transaction_reference(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.notes.label(class_='label') }}
+      {{ form.notes(class_='input-field', rows=3) }}
+    </div>
+    <div class="flex items-center gap-3">
+      {{ form.submit(class_='btn-primary') }}
+      <a href="{{ url_for('admin.invoices_detail', invoice_id=invoice.id) }}" class="btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

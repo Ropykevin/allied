@@ -1,0 +1,72 @@
+{% extends "emails/base_email.html" %}
+
+{% block email_title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block email_body %}
+<h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;color:#412919;">Your Invoice</h1>
+<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#29231F;">
+  Dear {{ invoice.customer.full_name }},<br>
+  Please find your invoice for booking <strong>{{ booking.reference }}</strong>.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#FAF8F4;border-radius:6px;border:1px solid rgba(65,41,25,0.08);">
+  <tr>
+    <td style="padding:20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;">Invoice Number</td>
+          <td style="padding:6px 0;font-size:16px;font-weight:700;color:#412919;text-align:right;">{{ invoice.invoice_number }}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;">Tour</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ booking.display_title }}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;">Issue Date</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ invoice.issue_date.strftime('%d %B %Y') }}</td>
+        </tr>
+        {% if invoice.due_date %}
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;">Due Date</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ invoice.due_date.strftime('%d %B %Y') }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td style="padding:12px 0 6px;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;border-top:1px solid rgba(65,41,25,0.08);">Total Due</td>
+          <td style="padding:12px 0 6px;font-size:20px;font-weight:700;color:#BE9D4F;text-align:right;border-top:1px solid rgba(65,41,25,0.08);">{{ invoice.currency }} {{ "{:,.2f}".format(invoice.total) }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+{% if invoice.items %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
+  <tr>
+    <td style="padding:8px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;border-bottom:1px solid rgba(65,41,25,0.08);">Description</td>
+    <td style="padding:8px 0;font-size:12px;font-weight:600;text-transform:uppercase;color:#746B63;border-bottom:1px solid rgba(65,41,25,0.08);text-align:right;">Amount</td>
+  </tr>
+  {% for item in invoice.items %}
+  <tr>
+    <td style="padding:10px 0;font-size:14px;color:#29231F;border-bottom:1px solid rgba(65,41,25,0.05);">{{ item.description }} × {{ item.quantity }}</td>
+    <td style="padding:10px 0;font-size:14px;color:#29231F;text-align:right;border-bottom:1px solid rgba(65,41,25,0.05);">{{ invoice.currency }} {{ "{:,.2f}".format(item.line_total) }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if invoice.payment_instructions %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:rgba(190,157,79,0.12);border-radius:6px;border:1px solid rgba(190,157,79,0.3);">
+  <tr>
+    <td style="padding:16px 20px;">
+      <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#412919;">Payment Instructions</p>
+      <p style="margin:0;font-size:14px;line-height:1.6;color:#29231F;white-space:pre-line;">{{ invoice.payment_instructions }}</p>
+    </td>
+  </tr>
+</table>
+{% endif %}
+
+<p style="margin:0;font-size:14px;line-height:1.6;color:#746B63;">
+  Quote booking reference <strong style="color:#412919;">{{ booking.reference }}</strong> when making payment. Contact us if you have any questions.
+</p>
+{% endblock %}

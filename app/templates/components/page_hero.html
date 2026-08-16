@@ -1,0 +1,35 @@
+{#
+  Image hero used across public pages.
+  Usage:
+    {% from "components/page_hero.html" import page_hero with context %}
+    {{ page_hero("Title", eyebrow="Label", subtitle="...", image=page_hero_image()) }}
+    {{ page_hero("Title", image=page_hero_image(tour.hero_image), size="tall", meta=...) }}
+#}
+{% macro page_hero(title, eyebrow='', subtitle='', image=none, size='default', cta_html='', meta_html='') -%}
+{% set src = hero_image_url(image) %}
+{% set min_h = 'min-h-[50vh] md:min-h-[60vh]' if size == 'tall' else 'min-h-[40vh]' %}
+<section class="relative {{ min_h }} overflow-hidden" aria-labelledby="page-heading">
+  <img
+    src="{{ src }}"
+    alt=""
+    class="absolute inset-0 h-full w-full object-cover"
+    {% if size == 'tall' %}fetchpriority="high"{% else %}loading="eager"{% endif %}
+  >
+  <div class="hero-overlay absolute inset-0" aria-hidden="true"></div>
+  <div class="container-page relative z-10 flex {{ min_h }} flex-col justify-end pb-12 pt-28 {% if size == 'tall' %}md:pb-16{% endif %}">
+    {% if eyebrow %}
+    <p class="text-sm font-semibold uppercase tracking-widest text-gold">{{ eyebrow }}</p>
+    {% endif %}
+    <h1 id="page-heading" class="mt-2 font-display text-4xl font-bold text-white md:text-5xl">{{ title }}</h1>
+    {% if meta_html %}
+    <div class="mt-4 text-cream/90">{{ meta_html|safe }}</div>
+    {% endif %}
+    {% if subtitle %}
+    <p class="mt-4 max-w-2xl text-lg text-cream/85">{{ subtitle }}</p>
+    {% endif %}
+    {% if cta_html %}
+    <div class="mt-8">{{ cta_html|safe }}</div>
+    {% endif %}
+  </div>
+</section>
+{%- endmacro %}

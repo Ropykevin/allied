@@ -1,0 +1,146 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Tours' }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Our Tours",
+  eyebrow="Adventures",
+  subtitle="Browse curated safaris, cultural journeys, and bespoke experiences across East Africa.",
+  image=page_hero_image()
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page">
+    {# Filters #}
+    <form method="get" action="{{ url_for('public.tours') }}" class="card mb-10 p-5 md:p-6" aria-label="Filter tours">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="sm:col-span-2 lg:col-span-1">
+          <label for="q" class="label">Search</label>
+          <input type="search" name="q" id="q" value="{{ filters.q or '' }}" placeholder="Tour name or keyword" class="input-field">
+        </div>
+        <div>
+          <label for="destination" class="label">Destination</label>
+          <select name="destination" id="destination" class="input-field">
+            <option value="">All destinations</option>
+            {% for dest in destinations %}
+            <option value="{{ dest.id }}" {% if filters.destination == dest.id %}selected{% endif %}>{{ dest.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="category" class="label">Category</label>
+          <select name="category" id="category" class="input-field">
+            <option value="">All categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="duration" class="label">Duration (days)</label>
+          <input type="number" name="duration" id="duration" min="1" value="{{ filters.duration or '' }}" placeholder="Any" class="input-field">
+        </div>
+        <div>
+          <label for="min_price" class="label">Min price</label>
+          <input type="number" name="min_price" id="min_price" min="0" step="1" value="{{ filters.min_price if filters.min_price is not none else '' }}" placeholder="Any" class="input-field">
+        </div>
+        <div>
+          <label for="max_price" class="label">Max price</label>
+          <input type="number" name="max_price" id="max_price" min="0" step="1" value="{{ filters.max_price if filters.max_price is not none else '' }}" placeholder="Any" class="input-field">
+        </div>
+        <div>
+          <label for="sort" class="label">Sort by</label>
+          <select name="sort" id="sort" class="input-field">
+            <option value="featured" {% if filters.sort == 'featured' %}selected{% endif %}>Featured</option>
+            <option value="price_asc" {% if filters.sort == 'price_asc' %}selected{% endif %}>Price: low to high</option>
+            <option value="price_desc" {% if filters.sort == 'price_desc' %}selected{% endif %}>Price: high to low</option>
+            <option value="duration" {% if filters.sort == 'duration' %}selected{% endif %}>Duration</option>
+            <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Name</option>
+          </select>
+        </div>
+        <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+          <button type="submit" class="btn-primary flex-1">Apply Filters</button>
+          <a href="{{ url_for('public.tours') }}" class="btn-ghost shrink-0">Reset</a>
+        </div>
+      </div>
+    </form>
+
+    {# Results #}
+    {% if tours %}
+    <p class="mb-6 text-sm text-ink-muted">
+      Showing {{ pagination.items|length }} of {{ pagination.total }} tour{% if pagination.total != 1 %}s{% endif %}
+      {% if pagination.page > 1 %} — page {{ pagination.page }} of {{ pagination.pages }}{% endif %}
+    </p>
+
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {% for tour in tours %}
+      <article class="card group flex flex-col">
+        <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="relative block aspect-[4/3] overflow-hidden">
+          {% if tour.hero_image %}
+          <img src="{{ url_for('static', filename=tour.hero_image) }}" alt="{{ tour.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+          {% else %}
+          <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80" alt="{{ tour.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+          {% endif %}
+          {% if tour.destination %}
+          <span class="absolute bottom-3 left-3 badge-info">{{ tour.destination.name }}</span>
+          {% endif %}
+        </a>
+        <div class="flex flex-1 flex-col p-5">
+          <h2 class="font-display text-xl font-semibold">
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="hover:text-gold">{{ tour.name }}</a>
+          </h2>
+          <p class="mt-1 text-sm text-ink-muted">
+            {{ tour.duration_days }} day{% if tour.duration_days != 1 %}s{% endif %}
+            {% if tour.category %} · {{ tour.category }}{% endif %}
+          </p>
+          {% if tour.short_description %}
+          <p class="mt-3 flex-1 text-sm leading-relaxed text-ink-muted line-clamp-3">{{ tour.short_description }}</p>
+          {% endif %}
+          <div class="mt-4 flex items-center justify-between border-t border-chocolate/5 pt-4">
+            <span class="text-sm text-ink-muted">From</span>
+            <span class="font-display text-xl font-semibold text-chocolate">{{ tour.currency }} {{ "{:,.0f}".format(tour.starting_price) }}</span>
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="btn-outline text-center text-xs">Details</a>
+            <a href="{{ url_for('public.book_tour', slug=tour.slug) }}" class="btn-primary text-center text-xs">Book Now</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if pagination.pages > 1 %}
+    <nav class="mt-12 flex justify-center gap-2" aria-label="Tour pagination">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('public.tours', page=pagination.prev_num, q=filters.q, destination=filters.destination, category=filters.category, duration=filters.duration, min_price=filters.min_price, max_price=filters.max_price, sort=filters.sort) }}" class="btn-outline">Previous</a>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          {% if p == pagination.page %}
+          <span class="btn-primary pointer-events-none" aria-current="page">{{ p }}</span>
+          {% else %}
+          <a href="{{ url_for('public.tours', page=p, q=filters.q, destination=filters.destination, category=filters.category, duration=filters.duration, min_price=filters.min_price, max_price=filters.max_price, sort=filters.sort) }}" class="btn-ghost">{{ p }}</a>
+          {% endif %}
+        {% else %}
+          <span class="px-2 text-ink-muted">&hellip;</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('public.tours', page=pagination.next_num, q=filters.q, destination=filters.destination, category=filters.category, duration=filters.duration, min_price=filters.min_price, max_price=filters.max_price, sort=filters.sort) }}" class="btn-outline">Next</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="card p-12 text-center">
+      <h2 class="font-display text-2xl">No tours found</h2>
+      <p class="mt-2 text-ink-muted">Try adjusting your filters or browse all tours.</p>
+      <a href="{{ url_for('public.tours') }}" class="btn-primary mt-6 inline-flex">View All Tours</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

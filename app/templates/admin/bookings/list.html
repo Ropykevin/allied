@@ -1,0 +1,82 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Bookings — {{ company_name }}{% endblock %}
+{% block page_title %}Bookings{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <form method="get" class="flex flex-wrap gap-2">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search reference…" class="input-field w-full sm:w-56">
+    {% if status != 'all' %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    <button type="submit" class="btn-outline">Search</button>
+  </form>
+  <div class="flex flex-wrap gap-2 text-sm">
+    <a href="{{ url_for('admin.bookings_list') }}" class="{% if status == 'all' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">All</a>
+    <a href="{{ url_for('admin.bookings_list', status='NEW') }}" class="{% if status == 'NEW' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">New</a>
+    <a href="{{ url_for('admin.bookings_list', status='UNDER_REVIEW') }}" class="{% if status == 'UNDER_REVIEW' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Pending</a>
+    <a href="{{ url_for('admin.bookings_list', status='CONFIRMED') }}" class="{% if status == 'CONFIRMED' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Confirmed</a>
+    <a href="{{ url_for('admin.bookings_list', status='CANCELLED') }}" class="{% if status == 'CANCELLED' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Cancelled</a>
+  </div>
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if bookings %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Reference</th>
+        <th>Type</th>
+        <th>Customer</th>
+        <th>Item</th>
+        <th>Date</th>
+        <th>Travelers</th>
+        <th>Est. Total</th>
+        <th>Status</th>
+        <th>Payment</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for booking in bookings %}
+      <tr class="hover:bg-cream/50 cursor-pointer" onclick="window.location='{{ url_for('admin.bookings_detail', booking_id=booking.id) }}'">
+        <td><span class="font-medium text-gold">{{ booking.reference }}</span></td>
+        <td><span class="badge-neutral">{{ 'Service' if booking.is_service_booking else 'Tour' }}</span></td>
+        <td>{{ booking.customer.full_name }}</td>
+        <td class="max-w-[140px] truncate">{{ booking.display_title }}</td>
+        <td>
+          {% if booking.is_service_booking %}
+            {{ booking.preferred_travel_date.strftime('%d %b %Y') if booking.preferred_travel_date else '—' }}
+          {% else %}
+            {{ booking.departure.departure_date.strftime('%d %b %Y') if booking.departure else '—' }}
+          {% endif %}
+        </td>
+        <td>{{ booking.adults }}A{% if booking.children %}, {{ booking.children }}C{% endif %}</td>
+        <td>{{ booking.currency }} {{ '%.2f'|format(booking.estimated_total) }}</td>
+        <td>{% with kind='booking', status=booking.booking_status %}{% include 'components/status_badge.html' %}{% endwith %}</td>
+        <td>{% with kind='payment', status=booking.payment_status %}{% include 'components/status_badge.html' %}{% endwith %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagination.pages > 1 %}
+  <div class="mt-4 flex items-center justify-between border-t border-chocolate/10 pt-4 text-sm">
+    <span class="text-ink-muted">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('admin.bookings_list', page=pagination.prev_num, status=status, q=q) }}" class="btn-outline py-1.5 px-3">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('admin.bookings_list', page=pagination.next_num, status=status, q=q) }}" class="btn-outline py-1.5 px-3">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No bookings found</p>
+    <p class="mt-1 text-sm text-ink-muted">{% if q or status != 'all' %}Try adjusting your filters.{% else %}Bookings will appear here when customers submit requests.{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

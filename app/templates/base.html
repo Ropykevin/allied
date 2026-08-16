@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ seo.title if seo else company_name }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ seo.description if seo else company_tagline }}{% endblock %}">
+  {% if seo and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+  <meta property="og:title" content="{% block og_title %}{{ seo.title if seo else company_name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ seo.description if seo else company_tagline }}{% endblock %}">
+  {% if seo and seo.og_image %}
+  <meta property="og:image" content="{{ url_for('static', filename=seo.og_image, _external=True) }}">
+  {% endif %}
+  {% if seo and seo.noindex %}<meta name="robots" content="noindex,nofollow">{% endif %}
+  <link rel="icon" href="{{ url_for('static', filename='assets/brand/favicon.png') }}" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% block body %}{% endblock %}
+  <div id="toast-root" class="fixed bottom-4 right-4 z-50 space-y-2" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

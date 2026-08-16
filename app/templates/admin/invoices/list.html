@@ -1,0 +1,64 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Invoices — {{ company_name }}{% endblock %}
+{% block page_title %}Invoices{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex flex-wrap gap-2 text-sm">
+  <a href="{{ url_for('admin.invoices_list') }}" class="{% if status == 'all' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">All</a>
+  <a href="{{ url_for('admin.invoices_list', status='pending') }}" class="{% if status == 'pending' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Pending</a>
+  <a href="{{ url_for('admin.invoices_list', status='paid') }}" class="{% if status == 'paid' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Paid</a>
+  <a href="{{ url_for('admin.invoices_list', status='outstanding') }}" class="{% if status == 'outstanding' %}badge-info{% else %}btn-outline py-1.5 px-3{% endif %}">Outstanding</a>
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if invoices %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Invoice #</th>
+        <th>Customer</th>
+        <th>Booking</th>
+        <th>Issue Date</th>
+        <th>Total</th>
+        <th>Balance</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for invoice in invoices %}
+      <tr class="hover:bg-cream/50 cursor-pointer" onclick="window.location='{{ url_for('admin.invoices_detail', invoice_id=invoice.id) }}'">
+        <td><span class="font-medium text-gold">{{ invoice.invoice_number }}</span></td>
+        <td>{{ invoice.customer.full_name if invoice.customer else '—' }}</td>
+        <td>{{ invoice.booking.reference if invoice.booking else '—' }}</td>
+        <td>{{ invoice.issue_date.strftime('%d %b %Y') if invoice.issue_date else '—' }}</td>
+        <td>{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</td>
+        <td>{{ invoice.currency }} {{ '%.2f'|format(invoice.balance) }}</td>
+        <td><span class="badge-neutral">{{ invoice.status|replace('_', ' ')|title }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagination.pages > 1 %}
+  <div class="mt-4 flex items-center justify-between border-t border-chocolate/10 pt-4 text-sm">
+    <span class="text-ink-muted">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('admin.invoices_list', page=pagination.prev_num, status=status) }}" class="btn-outline py-1.5 px-3">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('admin.invoices_list', page=pagination.next_num, status=status) }}" class="btn-outline py-1.5 px-3">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No invoices found</p>
+    <p class="mt-1 text-sm text-ink-muted">Invoices are generated from booking details.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

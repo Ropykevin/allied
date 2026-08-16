@@ -1,0 +1,130 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{% if tour %}Edit Tour{% else %}New Tour{% endif %} — {{ company_name }}{% endblock %}
+{% block page_title %}{% if tour %}Edit Tour{% else %}New Tour{% endif %}{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">{% if tour %}{{ tour.name }}{% else %}Create a new tour package{% endif %}</p>{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data" class="max-w-4xl space-y-6">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <h2 class="font-display text-lg text-chocolate">Basic Information</h2>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        {{ form.name.label(class_='label') }}
+        {{ form.name(class_='input-field') }}
+        {% for e in form.name.errors %}<p class="mt-1 text-sm text-red-600">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        {{ form.slug.label(class_='label') }}
+        {{ form.slug(class_='input-field', placeholder='auto-generated if empty') }}
+      </div>
+      <div>
+        {{ form.destination_id.label(class_='label') }}
+        {{ form.destination_id(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.category.label(class_='label') }}
+        {{ form.category(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.short_description.label(class_='label') }}
+        {{ form.short_description(class_='input-field') }}
+      </div>
+    </div>
+    <div>
+      {{ form.overview.label(class_='label') }}
+      {{ form.overview(class_='input-field', rows=5) }}
+    </div>
+  </div>
+
+  <div class="admin-card space-y-5">
+    <h2 class="font-display text-lg text-chocolate">Pricing &amp; Capacity</h2>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div>
+        {{ form.duration_days.label(class_='label') }}
+        {{ form.duration_days(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.duration_nights.label(class_='label') }}
+        {{ form.duration_nights(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.starting_price.label(class_='label') }}
+        {{ form.starting_price(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.currency.label(class_='label') }}
+        {{ form.currency(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.default_capacity.label(class_='label') }}
+        {{ form.default_capacity(class_='input-field') }}
+      </div>
+    </div>
+    <div>
+      {{ form.pickup_info.label(class_='label') }}
+      {{ form.pickup_info(class_='input-field', rows=3) }}
+    </div>
+  </div>
+
+  <div class="admin-card space-y-5">
+    <h2 class="font-display text-lg text-chocolate">Media &amp; Map</h2>
+    <div>
+      {{ form.hero_image_file.label(class_='label') }}
+      {{ form.hero_image_file(class_='input-field') }}
+      {% if tour and tour.hero_image %}
+      <p class="mt-1 text-xs text-ink-muted">Current: {{ tour.hero_image }}</p>
+      {% endif %}
+    </div>
+    <div>
+      {{ form.map_embed_url.label(class_='label') }}
+      {{ form.map_embed_url(class_='input-field') }}
+    </div>
+  </div>
+
+  <div class="admin-card space-y-5">
+    <h2 class="font-display text-lg text-chocolate">Inclusions &amp; Exclusions</h2>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        {{ form.inclusions_text.label(class_='label') }}
+        {{ form.inclusions_text(class_='input-field', rows=6, placeholder='One item per line') }}
+      </div>
+      <div>
+        {{ form.exclusions_text.label(class_='label') }}
+        {{ form.exclusions_text(class_='input-field', rows=6, placeholder='One item per line') }}
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-card space-y-5">
+    <h2 class="font-display text-lg text-chocolate">Publishing &amp; SEO</h2>
+    <div class="flex flex-wrap gap-6">
+      <label class="flex items-center gap-2 text-sm">
+        {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+        {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+        {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+      </label>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        {{ form.seo_title.label(class_='label') }}
+        {{ form.seo_title(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.seo_description.label(class_='label') }}
+        {{ form.seo_description(class_='input-field') }}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.tours_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

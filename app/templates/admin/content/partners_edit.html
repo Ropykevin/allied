@@ -1,0 +1,54 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Edit Partner — {{ company_name }}{% endblock %}
+{% block page_title %}Edit Partner{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Update partner details</p>{% endblock %}
+
+{% block admin_content %}
+<div class="mx-auto max-w-2xl">
+  <div class="admin-card">
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+      {{ form.hidden_tag() }}
+
+      <div>
+        {{ form.name.label(class_='label') }}
+        {{ form.name(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.website_url.label(class_='label') }}
+        {{ form.website_url(class_='input-field', placeholder='https://') }}
+      </div>
+      <div>
+        {{ form.description.label(class_='label') }}
+        {{ form.description(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.logo.label(class_='label') }}
+        {% if partner.logo_path %}
+        <img src="{{ url_for('static', filename=partner.logo_path) }}" alt="{{ partner.name }}" class="mb-2 h-16 w-16 rounded-md object-contain border border-chocolate/10 bg-white p-1">
+        {% endif %}
+        {{ form.logo(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.sort_order.label(class_='label') }}
+        {{ form.sort_order(class_='input-field') }}
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        {{ form.submit(class_='btn-primary') }}
+        <a href="{{ url_for('admin.partners_list') }}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

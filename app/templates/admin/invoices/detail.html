@@ -1,0 +1,338 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Invoice {{ invoice.invoice_number }} — {{ company_name }}{% endblock %}
+{% block page_title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+{% block page_subtitle %}
+<p class="text-sm text-ink-muted">
+  Issued {{ invoice.issue_date.strftime('%d %b %Y') if invoice.issue_date else '—' }}
+  {% if invoice.due_date %} · Due {{ invoice.due_date.strftime('%d %b %Y') }}{% endif %}
+</p>
+{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="admin-card">
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+        <div>
+          <span class="badge-neutral">{{ invoice.status|replace('_', ' ')|title }}</span>
+          {% if invoice.sent_at %}
+          <p class="mt-1 text-xs text-ink-muted">Sent {{ invoice.sent_at.strftime('%d %b %Y, %H:%M') }}</p>
+          {% endif %}
+          {% if can_edit and booking and booking.is_service_booking %}
+          <p class="mt-2 text-sm text-ink-muted">Set prices from the client request details, then save before sending.</p>
+          {% endif %}
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="{{ url_for('admin.invoices_pdf', invoice_id=invoice.id) }}" class="btn-outline py-1.5 px-3" target="_blank">Download PDF</a>
+          {% if current_user.has_permission('invoices.send') and invoice.status in ['DRAFT', 'SENT', 'PARTIALLY_PAID', 'OVERDUE'] %}
+          <form method="post" action="{{ url_for('admin.invoices_send', invoice_id=invoice.id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-gold py-1.5 px-3">Send Invoice</button>
+          </form>
+          {% endif %}
+          {% if current_user.has_permission('payments.record') and invoice.balance > 0 %}
+          <a href="{{ url_for('admin.payments_record', invoice_id=invoice.id) }}" class="btn-primary py-1.5 px-3">Record Payment</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <dl class="grid gap-4 sm:grid-cols-2 text-sm mb-6">
+        <div>
+          <dt class="text-ink-muted">Customer</dt>
+          <dd class="font-medium text-chocolate">{{ invoice.customer.full_name if invoice.customer else '—' }}</dd>
+          <dd class="text-ink-muted">{{ invoice.customer.email if invoice.customer else '' }}</dd>
+          <dd class="text-ink-muted">{{ invoice.customer.phone if invoice.customer else '' }}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-muted">Booking</dt>
+          <dd>
+            {% if invoice.booking %}
+            <a href="{{ url_for('admin.bookings_detail', booking_id=invoice.booking_id) }}" class="text-gold hover:underline">{{ invoice.booking.reference }}</a>
+            {% else %}—{% endif %}
+          </dd>
+          {% if booking %}
+          <dd class="mt-1 text-ink-muted">{{ booking.display_title }}</dd>
+          {% endif %}
+        </div>
+      </dl>
+
+      {% if can_edit %}
+      <form method="post" class="space-y-6">
+        {{ form.hidden_tag() }}
+
+        <div>
+          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 class="font-display text-lg text-chocolate">Line Items</h3>
+            <p class="text-xs text-ink-muted">Add, edit, or remove lines. Totals recalculate on save.</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="table-admin">
+              <thead>
+                <tr>
+                  <th class="min-w-[16rem]">Description</th>
+                  <th>Qty</th>
+                  <th>Unit Price</th>
+                  <th class="text-right">Line Total</th>
+                  <th class="text-right">Remove</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-chocolate/5" data-invoice-items>
+                {% for item in invoice.items %}
+                <tr>
+                  <td>
+                    <input type="text" name="item_description" value="{{ item.description }}" class="input-field" maxlength="300" required>
+                  </td>
+                  <td>
+                    <input type="number" name="item_quantity" value="{{ item.quantity }}" min="1" class="input-field w-20" required>
+                  </td>
+                  <td>
+                    <input type="number" name="item_unit_price" value="{{ '%.2f'|format(item.unit_price) }}" min="0" step="0.01" class="input-field w-32" required>
+                  </td>
+                  <td class="text-right text-sm text-ink-muted">{{ invoice.currency }} {{ '%.2f'|format(item.line_total) }}</td>
+                  <td class="text-right">
+                    <label class="inline-flex items-center gap-1 text-xs text-red-700">
+                      <input type="checkbox" name="item_remove" value="{{ loop.index0 }}" class="rounded border-chocolate/20 text-red-600 focus:ring-gold">
+                      Remove
+                    </label>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td>
+                    <input type="text" name="item_description" value="" class="input-field" maxlength="300" placeholder="Service / fee description" required>
+                  </td>
+                  <td>
+                    <input type="number" name="item_quantity" value="1" min="1" class="input-field w-20" required>
+                  </td>
+                  <td>
+                    <input type="number" name="item_unit_price" value="0.00" min="0" step="0.01" class="input-field w-32" required>
+                  </td>
+                  <td class="text-right text-sm text-ink-muted">—</td>
+                  <td></td>
+                </tr>
+                {% endfor %}
+                {# Extra blank row for adding a new line #}
+                <tr class="bg-cream/40">
+                  <td>
+                    <input type="text" name="item_description" value="" class="input-field" maxlength="300" placeholder="Add another line (optional)">
+                  </td>
+                  <td>
+                    <input type="number" name="item_quantity" value="1" min="1" class="input-field w-20">
+                  </td>
+                  <td>
+                    <input type="number" name="item_unit_price" value="" min="0" step="0.01" class="input-field w-32" placeholder="0.00">
+                  </td>
+                  <td class="text-right text-sm text-ink-muted">New</td>
+                  <td></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="border-t border-chocolate/10">
+                  <td colspan="3" class="text-right font-medium text-ink-muted pt-3">Current Subtotal</td>
+                  <td class="text-right pt-3">{{ invoice.currency }} {{ '%.2f'|format(invoice.subtotal) }}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right font-semibold text-chocolate">Current Total</td>
+                  <td class="text-right font-semibold text-chocolate">{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            {{ form.discount.label(class_='label') }}
+            {{ form.discount(class_='input-field') }}
+          </div>
+          <div>
+            {{ form.due_date.label(class_='label') }}
+            {{ form.due_date(class_='input-field') }}
+          </div>
+          <div class="sm:col-span-2">
+            {{ form.payment_instructions.label(class_='label') }}
+            {{ form.payment_instructions(class_='input-field', rows=3) }}
+          </div>
+          <div class="sm:col-span-2">
+            {{ form.terms.label(class_='label') }}
+            {{ form.terms(class_='input-field', rows=3) }}
+          </div>
+          <div class="sm:col-span-2">
+            {{ form.notes.label(class_='label') }}
+            {{ form.notes(class_='input-field', rows=2) }}
+            <p class="mt-1 text-xs text-ink-muted">Internal only — not shown on the customer PDF.</p>
+          </div>
+        </div>
+
+        {{ form.submit(class_='btn-primary') }}
+      </form>
+      {% else %}
+      {% if invoice.items %}
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th class="text-right">Line Total</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-chocolate/5">
+          {% for item in invoice.items %}
+          <tr>
+            <td>{{ item.description }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ invoice.currency }} {{ '%.2f'|format(item.unit_price) }}</td>
+            <td class="text-right">{{ invoice.currency }} {{ '%.2f'|format(item.line_total) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="border-t border-chocolate/10">
+            <td colspan="3" class="text-right font-medium text-ink-muted pt-3">Subtotal</td>
+            <td class="text-right pt-3">{{ invoice.currency }} {{ '%.2f'|format(invoice.subtotal) }}</td>
+          </tr>
+          {% if invoice.discount and invoice.discount > 0 %}
+          <tr>
+            <td colspan="3" class="text-right text-ink-muted">Discount</td>
+            <td class="text-right">− {{ invoice.currency }} {{ '%.2f'|format(invoice.discount) }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td colspan="3" class="text-right font-semibold text-chocolate">Total</td>
+            <td class="text-right font-semibold text-chocolate">{{ invoice.currency }} {{ '%.2f'|format(invoice.total) }}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-right text-ink-muted">Amount Paid</td>
+            <td class="text-right text-emerald-700">{{ invoice.currency }} {{ '%.2f'|format(invoice.amount_paid) }}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="text-right font-semibold text-gold">Balance Due</td>
+            <td class="text-right font-semibold text-gold">{{ invoice.currency }} {{ '%.2f'|format(invoice.balance) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+      {% endif %}
+
+      {% if invoice.payment_instructions %}
+      <div class="mt-6 border-t border-chocolate/10 pt-4">
+        <h3 class="text-sm font-semibold text-chocolate">Payment Instructions</h3>
+        <p class="mt-2 text-sm text-ink-muted whitespace-pre-line">{{ invoice.payment_instructions }}</p>
+      </div>
+      {% endif %}
+      {% if invoice.terms %}
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold text-chocolate">Terms</h3>
+        <p class="mt-2 text-sm text-ink-muted whitespace-pre-line">{{ invoice.terms }}</p>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="admin-card overflow-x-auto">
+      <h2 class="font-display text-lg text-chocolate mb-4">Payments</h2>
+      {% if invoice.payments %}
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Method</th>
+            <th>Reference</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-chocolate/5">
+          {% for payment in invoice.payments %}
+          <tr>
+            <td>{{ payment.payment_date.strftime('%d %b %Y') if payment.payment_date else '—' }}</td>
+            <td>{{ payment.method }}</td>
+            <td>{{ payment.transaction_reference or '—' }}</td>
+            <td>{{ payment.currency }} {{ '%.2f'|format(payment.amount) }}</td>
+            <td><span class="badge-neutral">{{ payment.status|title }}</span></td>
+            <td class="text-right whitespace-nowrap">
+              {% if current_user.has_permission('payments.verify') and payment.status == 'RECORDED' %}
+              <form method="post" action="{{ url_for('admin.payments_verify', payment_id=payment.id) }}" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="text-sm text-gold hover:underline">Verify</button>
+              </form>
+              {% endif %}
+              {% if current_user.has_permission('payments.refund') and payment.status == 'VERIFIED' %}
+              <form method="post" action="{{ url_for('admin.payments_refund', payment_id=payment.id) }}" class="inline ml-2" onsubmit="return confirm('Refund this payment?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="text-sm text-red-600 hover:underline">Refund</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-sm text-ink-muted py-4">No payments recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    {% if booking and booking.is_service_booking %}
+    <div class="admin-card space-y-3">
+      <h2 class="font-display text-lg text-chocolate">Client Request Details</h2>
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="text-ink-muted">Service</dt>
+          <dd class="font-medium text-chocolate">{{ booking.display_title }}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-muted">Travelers</dt>
+          <dd>{{ booking.adults }}</dd>
+        </div>
+        {% if booking.preferred_travel_date %}
+        <div>
+          <dt class="text-ink-muted">Preferred Travel Date</dt>
+          <dd>{{ booking.preferred_travel_date.strftime('%d %b %Y') }}</dd>
+        </div>
+        {% endif %}
+        {% if booking.destination_country %}
+        <div>
+          <dt class="text-ink-muted">Destination Country</dt>
+          <dd>{{ booking.destination_country }}</dd>
+        </div>
+        {% endif %}
+        {% if booking.customer and booking.customer.country %}
+        <div>
+          <dt class="text-ink-muted">Customer Country</dt>
+          <dd>{{ booking.customer.country }}</dd>
+        </div>
+        {% endif %}
+        {% if booking.special_requests %}
+        <div>
+          <dt class="text-ink-muted">Additional Details</dt>
+          <dd class="mt-1 whitespace-pre-line text-ink-muted">{{ booking.special_requests }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+      <a href="{{ url_for('admin.bookings_detail', booking_id=booking.id) }}" class="btn-outline w-full text-center">Open Booking</a>
+    </div>
+    {% endif %}
+
+    {% if can_edit and invoice.notes %}
+    <div class="admin-card">
+      <h2 class="font-display text-base text-chocolate">Saved Internal Notes</h2>
+      <p class="mt-2 text-sm text-ink-muted whitespace-pre-line">{{ invoice.notes }}</p>
+    </div>
+    {% elif not can_edit and invoice.notes %}
+    <div class="admin-card">
+      <h2 class="font-display text-base text-chocolate">Internal Notes</h2>
+      <p class="mt-2 text-sm text-ink-muted whitespace-pre-line">{{ invoice.notes }}</p>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('admin.invoices_list') }}" class="btn-outline w-full text-center">Back to Invoices</a>
+  </div>
+</div>
+{% endblock %}

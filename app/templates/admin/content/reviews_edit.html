@@ -1,0 +1,67 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Edit Testimonial — {{ company_name }}{% endblock %}
+{% block page_title %}Edit Testimonial{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Update customer feedback details</p>{% endblock %}
+
+{% block admin_content %}
+<div class="mx-auto max-w-2xl">
+  <div class="admin-card">
+    <form method="post" class="space-y-4">
+      {{ form.hidden_tag() }}
+
+      <div>
+        {{ form.customer_name.label(class_='label') }}
+        {{ form.customer_name(class_='input-field') }}
+        {% for error in form.customer_name.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          {{ form.rating.label(class_='label') }}
+          {{ form.rating(class_='input-field', min=1, max=5) }}
+          {% for error in form.rating.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+        <div>
+          {{ form.tour_id.label(class_='label') }}
+          {{ form.tour_id(class_='input-field') }}
+        </div>
+      </div>
+
+      <div>
+        {{ form.body.label(class_='label') }}
+        {{ form.body(class_='input-field', rows=5) }}
+        {% for error in form.body.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+
+      {% if review.is_demo %}
+      <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        This is marked as demo content. Unpublish it before go-live if it is not a real guest review.
+      </p>
+      {% endif %}
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        {{ form.submit(class_='btn-primary') }}
+        <a href="{{ url_for('admin.reviews_list') }}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

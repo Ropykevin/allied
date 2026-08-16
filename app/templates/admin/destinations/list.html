@@ -1,0 +1,57 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Destinations — {{ company_name }}{% endblock %}
+{% block page_title %}Destinations{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex justify-end">
+  {% if current_user.has_permission('destinations.create') %}
+  <a href="{{ url_for('admin.destinations_create') }}" class="btn-primary">Add Destination</a>
+  {% endif %}
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if destinations %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Destination</th>
+        <th>Country / Region</th>
+        <th>Order</th>
+        <th>Status</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for dest in destinations %}
+      <tr class="hover:bg-cream/50">
+        <td>
+          <p class="font-medium text-chocolate">{{ dest.name }}</p>
+          <p class="text-xs text-ink-muted">{{ dest.slug }}</p>
+        </td>
+        <td>{{ dest.country or '—' }}{% if dest.region %} / {{ dest.region }}{% endif %}</td>
+        <td>{{ dest.sort_order }}</td>
+        <td>
+          {% if dest.is_published %}<span class="badge-success">Published</span>{% else %}<span class="badge-neutral">Draft</span>{% endif %}
+          {% if dest.is_featured %}<span class="badge-info ml-1">Featured</span>{% endif %}
+        </td>
+        <td class="text-right">
+          {% if current_user.has_permission('destinations.update') %}
+          <a href="{{ url_for('admin.destinations_edit', destination_id=dest.id) }}" class="text-sm text-gold hover:underline">Edit</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No destinations yet</p>
+    <p class="mt-1 text-sm text-ink-muted">Add destinations before creating tours.</p>
+    {% if current_user.has_permission('destinations.create') %}
+    <a href="{{ url_for('admin.destinations_create') }}" class="btn-primary mt-4 inline-flex">Add Destination</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

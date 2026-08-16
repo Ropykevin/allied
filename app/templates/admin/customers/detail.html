@@ -1,0 +1,83 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{{ customer.full_name }} — {{ company_name }}{% endblock %}
+{% block page_title %}{{ customer.full_name }}{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Customer since {{ customer.created_at.strftime('%d %b %Y') if customer.created_at else '—' }}</p>{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="admin-card overflow-x-auto">
+      <h2 class="font-display text-lg text-chocolate mb-4">Bookings</h2>
+      {% if bookings %}
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Tour</th>
+            <th>Status</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-chocolate/5">
+          {% for b in bookings %}
+          <tr>
+            <td><a href="{{ url_for('admin.bookings_detail', booking_id=b.id) }}" class="text-gold hover:underline">{{ b.reference }}</a></td>
+            <td>{{ b.tour.name if b.tour else '—' }}</td>
+            <td>{% with kind='booking', status=b.booking_status %}{% include 'components/status_badge.html' %}{% endwith %}</td>
+            <td>{{ b.currency }} {{ '%.2f'|format(b.estimated_total) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-sm text-ink-muted py-4">No bookings for this customer.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <div class="admin-card">
+      <h2 class="font-display text-lg text-chocolate mb-4">Summary</h2>
+      <dl class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <dt class="text-ink-muted">Total Paid</dt>
+          <dd class="font-semibold text-emerald-700">{{ company_currency }} {{ '%.2f'|format(total_paid) }}</dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-ink-muted">Outstanding</dt>
+          <dd class="font-semibold text-chocolate">{{ company_currency }} {{ '%.2f'|format(outstanding) }}</dd>
+        </div>
+      </dl>
+    </div>
+
+    {% if current_user.has_permission('customers.update') %}
+    <div class="admin-card">
+      <h2 class="font-display text-lg text-chocolate mb-4">Edit Details</h2>
+      <form method="post" action="{{ url_for('admin.customers_edit', customer_id=customer.id) }}" class="space-y-4">
+        {{ form.hidden_tag() }}
+        <div>
+          {{ form.full_name.label(class_='label') }}
+          {{ form.full_name(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.email.label(class_='label') }}
+          {{ form.email(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.phone.label(class_='label') }}
+          {{ form.phone(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.country.label(class_='label') }}
+          {{ form.country(class_='input-field') }}
+        </div>
+        {{ form.submit(class_='btn-primary w-full') }}
+      </form>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('admin.customers_list') }}" class="btn-outline w-full text-center">Back to Customers</a>
+  </div>
+</div>
+{% endblock %}

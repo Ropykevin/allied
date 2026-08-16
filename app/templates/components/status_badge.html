@@ -1,0 +1,21 @@
+{% set booking_map = {
+  'NEW': 'badge-info',
+  'UNDER_REVIEW': 'badge-pending',
+  'INVOICED': 'badge-info',
+  'CONFIRMED': 'badge-success',
+  'CANCELLED': 'badge-danger',
+  'COMPLETED': 'badge-neutral'
+} %}
+{% set payment_map = {
+  'UNPAID': 'badge-pending',
+  'PARTIALLY_PAID': 'badge-pending',
+  'PAID': 'badge-success',
+  'REFUNDED': 'badge-danger'
+} %}
+{% if kind == 'booking' %}
+  <span class="{{ booking_map.get(status, 'badge-neutral') }}">{{ status|replace('_', ' ')|title }}</span>
+{% elif kind == 'payment' %}
+  <span class="{{ payment_map.get(status, 'badge-neutral') }}">{{ status|replace('_', ' ')|title }}</span>
+{% else %}
+  <span class="badge-neutral">{{ status }}</span>
+{% endif %}

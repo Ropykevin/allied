@@ -1,0 +1,53 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Destinations' }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Destinations",
+  eyebrow="Explore",
+  subtitle="From iconic national parks to coastal retreats — discover where Allied Tours can take you.",
+  image=page_hero_image()
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page">
+    {% if destinations %}
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      {% for dest in destinations %}
+      <article class="card group overflow-hidden">
+        <a href="{{ url_for('public.destination_detail', slug=dest.slug) }}" class="relative block aspect-[16/10] overflow-hidden">
+          {% if dest.hero_image %}
+          <img src="{{ url_for('static', filename=dest.hero_image) }}" alt="{{ dest.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+          {% else %}
+          <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80" alt="{{ dest.name }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy">
+          {% endif %}
+        </a>
+        <div class="p-5">
+          {% if dest.country or dest.region %}
+          <p class="text-xs font-semibold uppercase tracking-wider text-gold">
+            {{ dest.country }}{% if dest.country and dest.region %} · {% endif %}{{ dest.region }}
+          </p>
+          {% endif %}
+          <h2 class="mt-1 font-display text-xl font-semibold">
+            <a href="{{ url_for('public.destination_detail', slug=dest.slug) }}" class="hover:text-gold">{{ dest.name }}</a>
+          </h2>
+          {% if dest.short_description %}
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted line-clamp-3">{{ dest.short_description }}</p>
+          {% endif %}
+          <a href="{{ url_for('public.destination_detail', slug=dest.slug) }}" class="mt-4 inline-flex text-sm font-semibold text-chocolate hover:text-gold">Explore destination &rarr;</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card p-12 text-center">
+      <h2 class="font-display text-2xl">Destinations coming soon</h2>
+      <p class="mt-2 text-ink-muted">We are preparing our destination guides. Contact us in the meantime.</p>
+      <a href="{{ url_for('public.contact') }}" class="btn-primary mt-6 inline-flex">Contact Us</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block body_class %}min-h-screen flex flex-col{% endblock %}
+
+{% block body %}
+  {% include "components/public_nav.html" %}
+  {% include "components/flash.html" %}
+  <main id="main-content" class="flex-1" role="main">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "components/public_footer.html" %}
+  {% include "components/whatsapp_float.html" %}
+{% endblock %}

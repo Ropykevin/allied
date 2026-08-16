@@ -1,0 +1,71 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else destination.name }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  destination.name,
+  eyebrow=((destination.country ~ (" · " ~ destination.region if destination.region else "")) if destination.country else "Destination"),
+  subtitle=destination.short_description or "",
+  image=page_hero_image(destination.hero_image),
+  size="tall"
+) }}
+
+<div class="container-page section">
+  <div class="grid gap-12 lg:grid-cols-3">
+    <div class="lg:col-span-2 space-y-10">
+      {% if destination.description %}
+      <section aria-labelledby="about-heading">
+        <h2 id="about-heading" class="font-display text-2xl md:text-3xl mb-4">About {{ destination.name }}</h2>
+        <div class="prose prose-ink max-w-none text-ink-muted leading-relaxed">{{ destination.description|plain_text_html }}</div>
+      </section>
+      {% endif %}
+
+      {% if destination.attractions %}
+      <section aria-labelledby="attractions-heading">
+        <h2 id="attractions-heading" class="font-display text-2xl md:text-3xl mb-4">Highlights &amp; Attractions</h2>
+        <div class="prose prose-ink max-w-none text-ink-muted">{{ destination.attractions|plain_text_html }}</div>
+      </section>
+      {% endif %}
+
+      {% if destination.travel_info %}
+      <section aria-labelledby="travel-heading">
+        <h2 id="travel-heading" class="font-display text-2xl md:text-3xl mb-4">Travel Information</h2>
+        <div class="card p-6 prose prose-ink max-w-none text-ink-muted">{{ destination.travel_info|plain_text_html }}</div>
+      </section>
+      {% endif %}
+
+      {% set map_url = destination.map_embed_url|safe_map_url %}
+      {% if map_url %}
+      <section aria-labelledby="map-heading">
+        <h2 id="map-heading" class="font-display text-2xl md:text-3xl mb-4">Map</h2>
+        <div class="aspect-video overflow-hidden rounded-xl border border-chocolate/10">
+          <iframe src="{{ map_url }}" title="Map of {{ destination.name }}" class="h-full w-full border-0" loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe>
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <aside>
+      <div class="card sticky top-24 p-6">
+        <h2 class="font-display text-xl font-semibold mb-4">Tours in {{ destination.name }}</h2>
+        {% if tours %}
+        <ul class="space-y-4">
+          {% for tour in tours %}
+          <li class="border-b border-chocolate/5 pb-4 last:border-0 last:pb-0">
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="font-medium text-chocolate hover:text-gold">{{ tour.name }}</a>
+            <p class="mt-1 text-sm text-ink-muted">{{ tour.duration_days }} days · from {{ tour.currency }} {{ "{:,.0f}".format(tour.starting_price) }}</p>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-ink-muted">No published tours for this destination yet.</p>
+        {% endif %}
+        <a href="{{ url_for('public.tours', destination=destination.id) }}" class="btn-primary mt-6 w-full">Browse Tours</a>
+        <a href="{{ url_for('public.contact') }}" class="btn-outline mt-3 w-full">Ask About {{ destination.name }}</a>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

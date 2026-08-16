@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Sign In — {{ company_name }}{% endblock %}
+{% block body_class %}min-h-screen chocolate-section{% endblock %}
+
+{% block body %}
+<div class="flex min-h-screen items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <img src="{{ url_for('static', filename='assets/brand/logo-light.png') }}"
+           alt="{{ company_name }}"
+           class="mx-auto h-20 w-auto object-contain">
+      <p class="mt-4 font-display text-xl text-gold tracking-wide">Admin Portal</p>
+      <p class="mt-1 text-sm text-cream/70">Authorized staff access only</p>
+    </div>
+
+    <div class="rounded-xl border border-gold/20 bg-cream p-8 shadow-soft">
+      {% include 'components/flash.html' %}
+
+      <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}" class="space-y-5" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div>
+          {{ form.email.label(class_='label') }}
+          {{ form.email(class_='input-field', placeholder='you@alliedtours.com', autocomplete='email') }}
+          {% for error in form.email.errors %}
+            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div>
+          {{ form.password.label(class_='label') }}
+          {{ form.password(class_='input-field', placeholder='••••••••', autocomplete='current-password') }}
+          {% for error in form.password.errors %}
+            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div class="flex items-center gap-2">
+          {{ form.remember_me(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.remember_me.label(class_='text-sm text-ink-muted cursor-pointer') }}
+        </div>
+
+        {{ form.submit(class_='btn-gold w-full') }}
+      </form>
+
+      <div class="mt-6 border-t border-chocolate/10 pt-5 text-center">
+        <p class="text-sm text-ink-muted">
+          Forgot your password?
+          <span class="block mt-1 text-chocolate font-medium">Contact Super Admin</span>
+        </p>
+      </div>
+    </div>
+
+    <p class="mt-8 text-center text-xs text-cream/50">
+      &copy; {{ company_name }}. No public registration available.
+    </p>
+  </div>
+</div>
+{% endblock %}

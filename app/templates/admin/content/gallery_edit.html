@@ -1,0 +1,77 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Edit Gallery Image — {{ company_name }}{% endblock %}
+{% block page_title %}Edit Gallery Image{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Update details or replace the photo</p>{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="admin-card lg:col-span-1 h-fit">
+    <p class="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-3">Current image</p>
+    <div class="aspect-video overflow-hidden rounded-lg bg-cream">
+      <img
+        src="{{ url_for('static', filename=image.image_path) }}"
+        alt="{{ image.alt_text or image.title }}"
+        class="h-full w-full object-cover"
+      >
+    </div>
+    <p class="mt-3 text-sm font-medium text-chocolate">{{ image.title }}</p>
+    <p class="text-xs text-ink-muted">{{ image.category or 'Uncategorized' }}</p>
+  </div>
+
+  <div class="admin-card lg:col-span-2">
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+      {{ form.hidden_tag() }}
+
+      <div>
+        {{ form.title.label(class_='label') }}
+        {{ form.title(class_='input-field') }}
+        {% for error in form.title.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div>
+        {{ form.alt_text.label(class_='label') }}
+        {{ form.alt_text(class_='input-field') }}
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          {{ form.category.label(class_='label') }}
+          {{ form.category(class_='input-field') }}
+        </div>
+        <div>
+          {{ form.sort_order.label(class_='label') }}
+          {{ form.sort_order(class_='input-field') }}
+        </div>
+      </div>
+
+      <div>
+        {{ form.image_file.label(class_='label') }}
+        {{ form.image_file(class_='input-field', accept='.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp') }}
+        <p class="mt-1 text-xs text-ink-muted">Leave empty to keep the current image.</p>
+        {% for error in form.image_file.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-2">
+        {{ form.submit(class_='btn-primary') }}
+        <a href="{{ url_for('admin.gallery_list') }}" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

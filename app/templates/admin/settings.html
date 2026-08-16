@@ -1,0 +1,39 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Settings — {{ company_name }}{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Company contact details and default payment instructions</p>{% endblock %}
+
+{% block admin_content %}
+<form method="post" class="max-w-2xl">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <div>
+      {{ form.company_email.label(class_='label') }}
+      {{ form.company_email(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.company_phone.label(class_='label') }}
+      {{ form.company_phone(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.company_address.label(class_='label') }}
+      {{ form.company_address(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.payment_instructions.label(class_='label') }}
+      {{ form.payment_instructions(class_='input-field', rows=6) }}
+      <p class="mt-1 text-xs text-ink-muted">Used as default text when generating invoices.</p>
+    </div>
+  </div>
+
+  {% if current_user.has_permission('settings.update') %}
+  <div class="mt-6">
+    {{ form.submit(class_='btn-primary') }}
+  </div>
+  {% else %}
+  <p class="mt-4 text-sm text-ink-muted">You have read-only access to settings.</p>
+  {% endif %}
+</form>
+{% endblock %}

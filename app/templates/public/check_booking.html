@@ -1,0 +1,155 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Check Booking' }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Check Your Booking",
+  eyebrow="Booking Status",
+  subtitle="Enter your booking reference and the email or phone number used when booking.",
+  image=page_hero_image()
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page max-w-3xl">
+    <form method="post" action="{{ url_for('public.check_booking') }}" class="card p-6 md:p-8">
+      {{ form.hidden_tag() }}
+
+      <div class="space-y-5">
+        <div>
+          <label for="reference" class="label">{{ form.reference.label.text }}</label>
+          <input type="text" name="reference" id="reference" class="input-field uppercase" value="{{ form.reference.data or '' }}" required autocomplete="off" maxlength="32" placeholder="e.g. AT-2026-001234">
+          {% for error in form.reference.errors %}
+          <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+          {% endfor %}
+        </div>
+        <div>
+          <label for="contact" class="label">{{ form.contact.label.text }}</label>
+          <input type="text" name="contact" id="contact" class="input-field" value="{{ form.contact.data or '' }}" required autocomplete="email tel" maxlength="255" placeholder="Email or phone number">
+          {% for error in form.contact.errors %}
+          <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn-primary w-full sm:w-auto">{{ form.submit.label.text }}</button>
+      </div>
+    </form>
+
+    {% if booking %}
+    <div class="card mt-8 overflow-hidden" aria-live="polite">
+      <div class="chocolate-section px-6 py-5">
+        <h2 class="font-display text-xl text-white">Booking {{ booking.reference }}</h2>
+        <p class="mt-1 text-sm text-cream/70">{{ booking.display_title }}{% if booking.is_service_booking %} · Service{% endif %}</p>
+      </div>
+      <div class="p-6 md:p-8">
+        <dl class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Booking Status</dt>
+            <dd class="mt-2">
+              {% set status = booking.booking_status %}
+              {% set kind = 'booking' %}
+              {% include 'components/status_badge.html' %}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Payment Status</dt>
+            <dd class="mt-2">
+              {% set status = booking.payment_status %}
+              {% set kind = 'payment' %}
+              {% include 'components/status_badge.html' %}
+            </dd>
+          </div>
+          {% if booking.is_service_booking %}
+          {% if booking.preferred_travel_date %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Preferred Date</dt>
+            <dd class="mt-1 font-medium">{{ booking.preferred_travel_date.strftime('%d %B %Y') }}</dd>
+          </div>
+          {% endif %}
+          {% if booking.destination_country %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Destination</dt>
+            <dd class="mt-1 font-medium">{{ booking.destination_country }}</dd>
+          </div>
+          {% endif %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Travelers</dt>
+            <dd class="mt-1">{{ booking.adults }} traveler{% if booking.adults != 1 %}s{% endif %}</dd>
+          </div>
+          {% else %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Departure Date</dt>
+            <dd class="mt-1 font-medium">{{ booking.departure.departure_date.strftime('%d %B %Y') if booking.departure else '—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Travelers</dt>
+            <dd class="mt-1">{{ booking.adults }} adult{% if booking.adults != 1 %}s{% endif %}{% if booking.children %}, {{ booking.children }} child{% if booking.children != 1 %}ren{% endif %}{% endif %}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Estimated Total</dt>
+            <dd class="mt-1 font-display text-lg font-semibold">{{ booking.currency }} {{ "{:,.2f}".format(booking.estimated_total) }}</dd>
+          </div>
+          {% endif %}
+          {% if booking.customer %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Contact on File</dt>
+            <dd class="mt-1 text-sm text-ink-muted">
+              {# Mask sensitive contact details #}
+              {% set email = booking.customer.email %}
+              {% if '@' in email %}
+                {% set parts = email.split('@') %}
+                {{ parts[0][:2] }}***@{{ parts[1] }}
+              {% else %}
+                {{ email[:2] }}***
+              {% endif %}
+            </dd>
+          </div>
+          {% endif %}
+        </dl>
+
+        {% if booking.latest_invoice %}
+        {% set inv = booking.latest_invoice %}
+        <div class="mt-8 border-t border-chocolate/10 pt-8">
+          <h3 class="font-display text-lg font-semibold">Latest Invoice</h3>
+          <dl class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Invoice Number</dt>
+              <dd class="mt-1 font-medium">{{ inv.invoice_number }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Invoice Status</dt>
+              <dd class="mt-1"><span class="badge-info">{{ inv.status|replace('_', ' ')|title }}</span></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Total</dt>
+              <dd class="mt-1 font-display text-lg font-semibold">{{ inv.currency }} {{ "{:,.2f}".format(inv.total) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Amount Paid</dt>
+              <dd class="mt-1">{{ inv.currency }} {{ "{:,.2f}".format(inv.amount_paid) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Balance Due</dt>
+              <dd class="mt-1 font-medium {% if inv.balance > 0 %}text-amber-800{% else %}text-emerald-700{% endif %}">
+                {{ inv.currency }} {{ "{:,.2f}".format(inv.balance) }}
+              </dd>
+            </div>
+            {% if inv.due_date %}
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Due Date</dt>
+              <dd class="mt-1">{{ inv.due_date.strftime('%d %B %Y') }}</dd>
+            </div>
+            {% endif %}
+          </dl>
+        </div>
+        {% endif %}
+
+        <p class="mt-8 text-sm text-ink-muted">
+          Questions about your booking? <a href="{{ url_for('public.contact') }}" class="font-medium text-chocolate hover:text-gold">Contact us</a> and quote reference <strong>{{ booking.reference }}</strong>.
+        </p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

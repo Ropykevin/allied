@@ -1,0 +1,46 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{% if admin %}Edit Admin{% else %}New Admin{% endif %} — {{ company_name }}{% endblock %}
+{% block page_title %}{% if admin %}Edit Admin{% else %}New Admin{% endif %}{% endblock %}
+
+{% block admin_content %}
+<form method="post" class="max-w-lg space-y-6">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <div>
+      {{ form.full_name.label(class_='label') }}
+      {{ form.full_name(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.email.label(class_='label') }}
+      {{ form.email(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.role_id.label(class_='label') }}
+      {{ form.role_id(class_='input-field') }}
+      <p class="mt-1 text-xs text-ink-muted">Role controls what this user can view and change. Super Admin can further restrict permissions under Roles &amp; Permissions.</p>
+    </div>
+    <div>
+      {{ form.password.label(class_='label') }}
+      {{ form.password(class_='input-field') }}
+      {% if admin %}
+      <p class="mt-1 text-xs text-ink-muted">Leave blank to keep current password.</p>
+      {% endif %}
+    </div>
+    <div>
+      {{ form.confirm_password.label(class_='label') }}
+      {{ form.confirm_password(class_='input-field') }}
+    </div>
+    <label class="flex items-center gap-2">
+      {{ form.is_active(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+      {{ form.is_active.label(class_='label mb-0 cursor-pointer') }}
+    </label>
+  </div>
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.users_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

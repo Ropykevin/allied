@@ -1,0 +1,122 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Gallery — {{ company_name }}{% endblock %}
+{% block page_title %}Gallery{% endblock %}
+{% block page_subtitle %}<p class="text-sm text-ink-muted">Upload one or many travel photos for the public gallery</p>{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  {% if current_user.has_permission('content.create') %}
+  <div class="admin-card lg:col-span-1 h-fit">
+    <h2 class="font-display text-lg text-chocolate mb-4">Upload Images</h2>
+    <p class="mb-4 text-sm text-ink-muted">You can select <strong>many photos at once</strong> — they all go into the same public gallery.</p>
+    <form method="post" enctype="multipart/form-data" class="space-y-4" data-gallery-upload>
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.title.label(class_='label') }}
+        {{ form.title(class_='input-field', placeholder='Optional title or batch prefix') }}
+        <p class="mt-1 text-xs text-ink-muted">Used as a prefix when uploading multiple files.</p>
+      </div>
+      <div>
+        {{ form.alt_text.label(class_='label') }}
+        {{ form.alt_text(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.category.label(class_='label') }}
+        {{ form.category(class_='input-field', placeholder='e.g. Safari, Coast') }}
+      </div>
+      <div>
+        {{ form.sort_order.label(class_='label') }}
+        {{ form.sort_order(class_='input-field') }}
+      </div>
+      <div>
+        <label for="image_files" class="label">Images (multiple allowed)</label>
+        <input
+          type="file"
+          name="image_files"
+          id="image_files"
+          class="input-field"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          multiple
+          required
+        >
+        <p class="mt-1 text-xs text-ink-muted">Hold <kbd class="rounded bg-cream px-1">Ctrl</kbd> (Windows) or <kbd class="rounded bg-cream px-1">Cmd</kbd> (Mac) to select several files, or drag a whole selection into the picker.</p>
+        <p class="mt-2 hidden text-sm font-medium text-chocolate" data-file-count></p>
+        {% for error in form.image_files.errors %}
+        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+      {{ form.submit(class_='btn-primary w-full') }}
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="{% if current_user.has_permission('content.create') %}lg:col-span-2{% else %}lg:col-span-3{% endif %}">
+    <p class="mb-4 text-sm text-ink-muted">{{ images|length }} image{{ 's' if images|length != 1 else '' }} in gallery</p>
+    {% if images %}
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {% for img in images %}
+      <div class="admin-card p-0 overflow-hidden">
+        <div class="aspect-video bg-cream">
+          <img src="{{ url_for('static', filename=img.image_path) }}" alt="{{ img.alt_text or img.title }}" class="h-full w-full object-cover">
+        </div>
+        <div class="p-4">
+          <p class="font-medium text-chocolate truncate">{{ img.title }}</p>
+          <p class="text-xs text-ink-muted">{{ img.category or 'Uncategorized' }} · Order {{ img.sort_order }}</p>
+          <div class="mt-2 flex flex-wrap gap-2">
+            {% if img.is_published %}<span class="badge-success">Live</span>{% else %}<span class="badge-neutral">Hidden</span>{% endif %}
+            {% if img.is_featured %}<span class="badge-info">Featured</span>{% endif %}
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {% if current_user.has_permission('content.update') %}
+            <a href="{{ url_for('admin.gallery_edit', image_id=img.id) }}" class="btn-outline text-xs px-3 py-1.5">Edit</a>
+            {% endif %}
+            {% if current_user.has_permission('content.delete') %}
+            <form method="post" action="{{ url_for('admin.gallery_delete', image_id=img.id) }}" class="inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn-ghost text-xs px-3 py-1.5 text-red-700 hover:bg-red-50" data-confirm="Delete this gallery image? This cannot be undone.">Delete</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="admin-card py-16 text-center">
+      <p class="font-display text-lg text-chocolate">No gallery images</p>
+      <p class="mt-1 text-sm text-ink-muted">Upload photos to showcase your tours and destinations.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+(function () {
+  var input = document.getElementById('image_files');
+  var count = document.querySelector('[data-file-count]');
+  if (!input || !count) return;
+  input.addEventListener('change', function () {
+    var n = input.files ? input.files.length : 0;
+    if (n) {
+      count.textContent = n + ' file' + (n === 1 ? '' : 's') + ' selected';
+      count.classList.remove('hidden');
+    } else {
+      count.classList.add('hidden');
+    }
+  });
+})();
+</script>
+{% endblock %}

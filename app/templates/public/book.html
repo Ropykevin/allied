@@ -1,0 +1,187 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Book ' ~ tour.name }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Book: " ~ tour.name,
+  eyebrow="Booking Request",
+  subtitle="Submit your details below. No payment is required at this step — we will review your request and send an invoice.",
+  image=page_hero_image(tour.hero_image)
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page">
+    <div class="grid gap-10 lg:grid-cols-5">
+      {# Form #}
+      <div class="lg:col-span-3">
+        {% if departures %}
+        <form
+          method="post"
+          action="{{ url_for('public.book_tour', slug=tour.slug) }}"
+          class="card p-6 md:p-8"
+          data-booking-form
+          data-currency="{{ tour.currency }}"
+          novalidate
+        >
+          {{ form.hidden_tag() }}
+
+          <fieldset class="space-y-5">
+            <legend class="sr-only">Booking details</legend>
+
+            <div>
+              <label for="departure_id" class="label">{{ form.departure_id.label.text }}</label>
+              <select
+                name="departure_id"
+                id="departure_id"
+                class="input-field"
+                required
+                data-departure-select
+              >
+                {% for value, label in form.departure_id.choices %}
+                {% set dep = departures|selectattr('id', 'equalto', value)|first %}
+                <option
+                  value="{{ value }}"
+                  {% if form.departure_id.data == value %}selected{% endif %}
+                  {% if dep %}
+                  data-price-adult="{{ dep.price_adult }}"
+                  data-price-child="{{ dep.price_child or 0 }}"
+                  data-available-seats="{{ dep.available_seats }}"
+                  data-capacity="{{ dep.capacity }}"
+                  {% endif %}
+                >{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% for error in form.departure_id.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="adults" class="label">{{ form.adults.label.text }}</label>
+                <input type="number" name="adults" id="adults" class="input-field" min="1" max="50" value="{{ form.adults.data or 1 }}" required data-adults>
+                {% for error in form.adults.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+              <div>
+                <label for="children" class="label">{{ form.children.label.text }}</label>
+                <input type="number" name="children" id="children" class="input-field" min="0" max="50" value="{{ form.children.data or 0 }}" data-children>
+                {% for error in form.children.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            {# Estimated total (JS updates via data attributes) #}
+            <div class="rounded-lg border border-gold/30 bg-gold/10 p-4" data-estimate-panel aria-live="polite">
+              <p class="text-sm font-medium text-chocolate">Estimated total</p>
+              <p class="mt-1 font-display text-2xl font-semibold text-chocolate" data-estimated-total>
+                {{ tour.currency }} —
+              </p>
+              <p class="mt-1 text-xs text-ink-muted">Final amount confirmed on your invoice after review.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="mt-8 space-y-5 border-t border-chocolate/10 pt-8">
+            <legend class="mb-4 font-display text-lg font-semibold text-chocolate">Your Details</legend>
+
+            <div>
+              <label for="full_name" class="label">{{ form.full_name.label.text }}</label>
+              <input type="text" name="full_name" id="full_name" class="input-field" value="{{ form.full_name.data or '' }}" required autocomplete="name" maxlength="160">
+              {% for error in form.full_name.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="email" class="label">{{ form.email.label.text }}</label>
+                <input type="email" name="email" id="email" class="input-field" value="{{ form.email.data or '' }}" required autocomplete="email" maxlength="255">
+                {% for error in form.email.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+              <div>
+                <label for="phone" class="label">{{ form.phone.label.text }}</label>
+                <input type="tel" name="phone" id="phone" class="input-field" value="{{ form.phone.data or '' }}" required autocomplete="tel" maxlength="40">
+                {% for error in form.phone.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <label for="country" class="label">{{ form.country.label.text }}</label>
+              <input type="text" name="country" id="country" class="input-field" value="{{ form.country.data or '' }}" autocomplete="country-name" maxlength="120">
+              {% for error in form.country.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <div>
+              <label for="pickup_location" class="label">{{ form.pickup_location.label.text }}</label>
+              <input type="text" name="pickup_location" id="pickup_location" class="input-field" value="{{ form.pickup_location.data or '' }}" maxlength="255" placeholder="Hotel, airport, or address">
+              {% for error in form.pickup_location.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <div>
+              <label for="special_requests" class="label">{{ form.special_requests.label.text }}</label>
+              <textarea name="special_requests" id="special_requests" rows="4" class="input-field" maxlength="2000" placeholder="Dietary requirements, accessibility needs, etc.">{{ form.special_requests.data or '' }}</textarea>
+              {% for error in form.special_requests.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button type="submit" class="btn-primary sm:flex-1">{{ form.submit.label.text }}</button>
+            <a href="{{ url_for('public.tour_detail', slug=tour.slug) }}" class="btn-ghost text-center">Back to Tour</a>
+          </div>
+        </form>
+        {% else %}
+        <div class="card p-8 text-center">
+          <h2 class="font-display text-2xl">No bookable departures</h2>
+          <p class="mt-2 text-ink-muted">There are currently no open departures for this tour. Please contact us for availability.</p>
+          <a href="{{ url_for('public.contact') }}" class="btn-primary mt-6 inline-flex">Contact Us</a>
+        </div>
+        {% endif %}
+      </div>
+
+      {# Summary sidebar #}
+      <aside class="lg:col-span-2">
+        <div class="card overflow-hidden sticky top-24">
+          {% if tour.hero_image %}
+          <img src="{{ url_for('static', filename=tour.hero_image) }}" alt="{{ tour.name }}" class="aspect-video w-full object-cover">
+          {% endif %}
+          <div class="p-6">
+            <h2 class="font-display text-xl font-semibold">{{ tour.name }}</h2>
+            {% if tour.destination %}
+            <p class="mt-1 text-sm text-ink-muted">{{ tour.destination.name }}</p>
+            {% endif %}
+            <p class="mt-3 text-sm text-ink-muted">
+              {{ tour.duration_days }} day{% if tour.duration_days != 1 %}s{% endif %}
+              {% if tour.duration_nights %} · {{ tour.duration_nights }} night{% if tour.duration_nights != 1 %}s{% endif %}{% endif %}
+            </p>
+            <p class="mt-4 text-sm text-ink-muted">From <span class="font-display text-lg font-semibold text-chocolate">{{ tour.currency }} {{ "{:,.0f}".format(tour.starting_price) }}</span> per adult</p>
+
+            <div class="mt-6 rounded-lg bg-cream p-4 text-sm text-ink-muted">
+              <p class="font-semibold text-chocolate">What happens next?</p>
+              <ol class="mt-2 list-decimal space-y-1 pl-4">
+                <li>We review your request</li>
+                <li>You receive an invoice by email</li>
+                <li>Pay per invoice instructions</li>
+                <li>Booking confirmed — enjoy your trip!</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

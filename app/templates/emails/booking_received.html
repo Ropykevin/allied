@@ -1,0 +1,71 @@
+{% extends "emails/base_email.html" %}
+
+{% block email_title %}Booking Received — {{ booking.reference }}{% endblock %}
+
+{% block email_body %}
+<h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;color:#412919;">Booking Received</h1>
+<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#29231F;">
+  Dear {{ booking.customer.full_name }},
+</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#29231F;">
+  Thank you for your booking request with {{ company_name }}. We have received your submission and our team will review it shortly.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:#FAF8F4;border-radius:6px;border:1px solid rgba(65,41,25,0.08);">
+  <tr>
+    <td style="padding:20px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">Reference</td>
+          <td style="padding:6px 0;font-size:16px;font-weight:700;color:#412919;text-align:right;">{{ booking.reference }}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">{% if booking.is_service_booking %}Service{% else %}Tour{% endif %}</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ booking.display_title }}</td>
+        </tr>
+        {% if booking.is_service_booking %}
+        {% if booking.preferred_travel_date %}
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">Preferred Date</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ booking.preferred_travel_date.strftime('%d %B %Y') }}</td>
+        </tr>
+        {% endif %}
+        {% else %}
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">Departure</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">{{ booking.departure.departure_date.strftime('%d %B %Y') if booking.departure else '—' }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">Travelers</td>
+          <td style="padding:6px 0;font-size:14px;color:#29231F;text-align:right;">
+            {% if booking.is_service_booking %}
+            {{ booking.adults }} traveler{% if booking.adults != 1 %}s{% endif %}
+            {% else %}
+            {{ booking.adults }} adult{% if booking.adults != 1 %}s{% endif %}{% if booking.children %}, {{ booking.children }} child{% if booking.children != 1 %}ren{% endif %}{% endif %}
+            {% endif %}
+          </td>
+        </tr>
+        {% if not booking.is_service_booking %}
+        <tr>
+          <td style="padding:6px 0;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#746B63;">Estimated Total</td>
+          <td style="padding:6px 0;font-size:16px;font-weight:700;color:#BE9D4F;text-align:right;">{{ booking.currency }} {{ "{:,.2f}".format(booking.estimated_total) }}</td>
+        </tr>
+        {% endif %}
+      </table>
+    </td>
+  </tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;background-color:rgba(190,157,79,0.12);border-radius:6px;border:1px solid rgba(190,157,79,0.3);">
+  <tr>
+    <td style="padding:16px 20px;">
+      <p style="margin:0;font-size:14px;line-height:1.6;color:#412919;"><strong>Awaiting invoice:</strong> No payment is required at this time. You will receive an invoice by email with payment instructions once your booking has been reviewed.</p>
+    </td>
+  </tr>
+</table>
+
+<p style="margin:0;font-size:14px;line-height:1.6;color:#746B63;">
+  Save your reference number <strong style="color:#412919;">{{ booking.reference }}</strong> to check your booking status at any time.
+</p>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{% if departure %}Edit Departure{% else %}New Departure{% endif %} — {{ company_name }}{% endblock %}
+{% block page_title %}{% if departure %}Edit Departure{% else %}New Departure{% endif %}{% endblock %}
+
+{% block admin_content %}
+<form method="post" class="max-w-2xl space-y-6">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <div>
+      {{ form.tour_id.label(class_='label') }}
+      {{ form.tour_id(class_='input-field') }}
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        {{ form.departure_date.label(class_='label') }}
+        {{ form.departure_date(class_='input-field', type='date') }}
+      </div>
+      <div>
+        {{ form.return_date.label(class_='label') }}
+        {{ form.return_date(class_='input-field', type='date') }}
+      </div>
+      <div>
+        {{ form.capacity.label(class_='label') }}
+        {{ form.capacity(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.status.label(class_='label') }}
+        {{ form.status(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.price_adult.label(class_='label') }}
+        {{ form.price_adult(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.price_child.label(class_='label') }}
+        {{ form.price_child(class_='input-field') }}
+      </div>
+    </div>
+    <div>
+      {{ form.notes.label(class_='label') }}
+      {{ form.notes(class_='input-field') }}
+    </div>
+    <label class="flex items-center gap-2">
+      {{ form.is_active(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+      {{ form.is_active.label(class_='label mb-0 cursor-pointer') }}
+    </label>
+  </div>
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.departures_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

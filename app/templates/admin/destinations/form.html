@@ -1,0 +1,90 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{% if destination %}Edit Destination{% else %}New Destination{% endif %} — {{ company_name }}{% endblock %}
+{% block page_title %}{% if destination %}Edit Destination{% else %}New Destination{% endif %}{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data" class="max-w-3xl space-y-6">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        {{ form.name.label(class_='label') }}
+        {{ form.name(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.slug.label(class_='label') }}
+        {{ form.slug(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.sort_order.label(class_='label') }}
+        {{ form.sort_order(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.country.label(class_='label') }}
+        {{ form.country(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.region.label(class_='label') }}
+        {{ form.region(class_='input-field') }}
+      </div>
+      <div class="sm:col-span-2">
+        {{ form.short_description.label(class_='label') }}
+        {{ form.short_description(class_='input-field') }}
+      </div>
+    </div>
+    <div>
+      {{ form.description.label(class_='label') }}
+      {{ form.description(class_='input-field', rows=4) }}
+    </div>
+    <div>
+      {{ form.attractions.label(class_='label') }}
+      {{ form.attractions(class_='input-field', rows=3) }}
+    </div>
+    <div>
+      {{ form.travel_info.label(class_='label') }}
+      {{ form.travel_info(class_='input-field', rows=3) }}
+    </div>
+  </div>
+
+  <div class="admin-card space-y-5">
+    <div>
+      {{ form.hero_image_file.label(class_='label') }}
+      {{ form.hero_image_file(class_='input-field') }}
+      {% if destination and destination.hero_image %}
+      <p class="mt-1 text-xs text-ink-muted">Current: {{ destination.hero_image }}</p>
+      {% endif %}
+    </div>
+    <div>
+      {{ form.map_embed_url.label(class_='label') }}
+      {{ form.map_embed_url(class_='input-field') }}
+    </div>
+    <div class="flex flex-wrap gap-6">
+      <label class="flex items-center gap-2">
+        {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+        {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+      </label>
+      <label class="flex items-center gap-2">
+        {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+        {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+      </label>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        {{ form.seo_title.label(class_='label') }}
+        {{ form.seo_title(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.seo_description.label(class_='label') }}
+        {{ form.seo_description(class_='input-field') }}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.destinations_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

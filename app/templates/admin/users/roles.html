@@ -1,0 +1,49 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Roles &amp; Permissions — {{ company_name }}{% endblock %}
+{% block page_title %}Roles &amp; Permissions{% endblock %}
+{% block page_subtitle %}
+<p class="text-sm text-ink-muted">Assign roles to users, then restrict what each role can do.</p>
+{% endblock %}
+
+{% block admin_content %}
+<div class="space-y-6">
+  {% if roles %}
+  {% for role in roles %}
+  <div class="admin-card">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+      <div>
+        <h2 class="font-display text-lg text-chocolate">{{ role.name }}</h2>
+        {% if role.description %}
+        <p class="text-sm text-ink-muted mt-1">{{ role.description }}</p>
+        {% endif %}
+        <p class="mt-1 text-xs text-ink-muted">{{ role.admins.count() }} user(s) · {{ role.permissions|length }} permission(s)</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        {% if role.is_system %}
+        <span class="badge-info">System Role</span>
+        {% endif %}
+        {% if can_edit_roles and current_user.is_super_admin %}
+        <a href="{{ url_for('admin.roles_edit', role_id=role.id) }}" class="btn-outline py-1.5 px-3 text-sm">Edit Permissions</a>
+        {% endif %}
+      </div>
+    </div>
+    {% if role.permissions %}
+    <div class="flex flex-wrap gap-2">
+      {% for perm in role.permissions|sort(attribute='code') %}
+      <span class="badge-neutral text-xs">{{ perm.code }}</span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-ink-muted">No permissions assigned.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="admin-card py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No roles configured</p>
+    <p class="mt-1 text-sm text-ink-muted">Run the seed command to initialize roles and permissions.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

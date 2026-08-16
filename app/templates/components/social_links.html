@@ -1,0 +1,48 @@
+{# Social icon row — Facebook, Instagram, X/Twitter, YouTube.
+   Set social_variant = "dark" for chocolate/footer backgrounds (default: light).
+#}
+{% set variant = social_variant|default('light') %}
+{% set social_items = [
+  ('facebook', social_facebook, 'Facebook'),
+  ('instagram', social_instagram, 'Instagram'),
+  ('twitter', social_twitter, 'X (Twitter)'),
+  ('youtube', social_youtube, 'YouTube'),
+] %}
+<div class="flex flex-wrap items-center gap-2" role="list" aria-label="Social media">
+  {% for key, url, label in social_items %}
+  {% if url %}
+  <a
+    href="{{ url }}"
+    target="_blank"
+    rel="noopener noreferrer"
+    role="listitem"
+    class="inline-flex h-10 w-10 items-center justify-center rounded-full border transition {% if variant == 'dark' %}border-cream/20 text-cream hover:border-gold hover:text-gold{% else %}border-chocolate/15 text-chocolate hover:border-gold hover:text-gold{% endif %}"
+    aria-label="{{ company_name }} on {{ label }}"
+  >
+  {% else %}
+  <span
+    role="listitem"
+    class="inline-flex h-10 w-10 items-center justify-center rounded-full border opacity-50 {% if variant == 'dark' %}border-cream/20 text-cream/70{% else %}border-chocolate/15 text-chocolate/70{% endif %}"
+    title="{{ label }} — add your profile URL in settings"
+    aria-label="{{ label }} (link coming soon)"
+  >
+  {% endif %}
+    {% if key == 'twitter' %}
+    {# X logo reads cleanest as a solid mark (stroke outlines look skewed) #}
+    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+    {% else %}
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      {% if key == 'facebook' %}
+      <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+      {% elif key == 'instagram' %}
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+      {% elif key == 'youtube' %}
+      <path d="M22.54 6.42a2.78 2.78 0 00-1.94-1.96C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 1.96A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.94 1.96C5.12 20 12 20 12 20s6.88 0 8.6-.46a2.78 2.78 0 001.94-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/>
+      {% endif %}
+    </svg>
+    {% endif %}
+  {% if url %}</a>{% else %}</span>{% endif %}
+  {% endfor %}
+</div>

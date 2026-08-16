@@ -1,0 +1,18 @@
+{% extends "public/layout.html" %}
+
+{% block title %}Bad Request | {{ company_name }}{% endblock %}
+{% block meta_description %}The request could not be processed.{% endblock %}
+
+{% block content %}
+<section class="section bg-cream min-h-[50vh] flex items-center">
+  <div class="container-page max-w-xl text-center">
+    <p class="font-display text-8xl font-bold text-gold/30" aria-hidden="true">400</p>
+    <h1 class="mt-4 font-display text-3xl md:text-4xl">Bad Request</h1>
+    <p class="mt-4 text-ink-muted">We could not process your request. Please check your input and try again.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-4">
+      <a href="{{ url_for('public.home') }}" class="btn-primary">Go Home</a>
+      <a href="{{ url_for('public.contact') }}" class="btn-outline">Contact Support</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Booking {{ booking.reference }} — {{ company_name }}{% endblock %}
+{% block page_title %}Booking {{ booking.reference }}{% endblock %}
+{% block page_subtitle %}
+<p class="text-sm text-ink-muted">
+  Submitted {{ booking.created_at.strftime('%d %b %Y, %H:%M') if booking.created_at else '—' }}
+</p>
+{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  {# Main details #}
+  <div class="lg:col-span-2 space-y-6">
+    <div class="admin-card">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="font-display text-lg text-chocolate">{{ booking.display_title }}</h2>
+          <p class="text-sm text-ink-muted">
+            {% if booking.is_service_booking %}
+              Service booking
+              {% if booking.preferred_travel_date %} · Preferred: {{ booking.preferred_travel_date.strftime('%d %b %Y') }}{% endif %}
+              {% if booking.destination_country %} · {{ booking.destination_country }}{% endif %}
+            {% else %}
+              Departure: {{ booking.departure.departure_date.strftime('%d %b %Y') if booking.departure else '—' }}
+            {% endif %}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          {% with kind='booking', status=booking.booking_status %}{% include 'components/status_badge.html' %}{% endwith %}
+          {% with kind='payment', status=booking.payment_status %}{% include 'components/status_badge.html' %}{% endwith %}
+        </div>
+      </div>
+
+      <dl class="mt-6 grid gap-4 sm:grid-cols-2 text-sm">
+        <div>
+          <dt class="text-ink-muted">Customer</dt>
+          <dd class="font-medium text-chocolate">
+            <a href="{{ url_for('admin.customers_detail', customer_id=booking.customer_id) }}" class="text-gold hover:underline">{{ booking.customer.full_name }}</a>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-ink-muted">Email / Phone</dt>
+          <dd>{{ booking.customer.email }} · {{ booking.customer.phone }}</dd>
+        </div>
+        <div>
+          <dt class="text-ink-muted">Travelers</dt>
+          <dd>
+            {% if booking.is_service_booking %}
+            {{ booking.adults }} traveler(s)
+            {% else %}
+            {{ booking.adults }} adult(s){% if booking.children %}, {{ booking.children }} child(ren){% endif %}
+            {% endif %}
+          </dd>
+        </div>
+        {% if booking.is_service_booking and booking.special_requests %}
+        <div class="sm:col-span-2">
+          <dt class="text-ink-muted">Additional Details</dt>
+          <dd class="whitespace-pre-line">{{ booking.special_requests }}</dd>
+        </div>
+        {% endif %}
+        <div>
+          <dt class="text-ink-muted">Estimated Total</dt>
+          <dd class="font-semibold text-chocolate">{{ booking.currency }} {{ '%.2f'|format(booking.estimated_total) }}</dd>
+        </div>
+        {% if booking.pickup_location %}
+        <div class="sm:col-span-2">
+          <dt class="text-ink-muted">Pickup Location</dt>
+          <dd>{{ booking.pickup_location }}</dd>
+        </div>
+        {% endif %}
+        {% if booking.special_requests %}
+        <div class="sm:col-span-2">
+          <dt class="text-ink-muted">Special Requests</dt>
+          <dd>{{ booking.special_requests }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+    </div>
+
+    {% if booking.passengers %}
+    <div class="admin-card overflow-x-auto">
+      <h2 class="font-display text-lg text-chocolate mb-4">Passengers</h2>
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Age</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-chocolate/5">
+          {% for p in booking.passengers %}
+          <tr>
+            <td>{{ p.full_name }}</td>
+            <td>{{ p.passenger_type|title }}</td>
+            <td>{{ p.age or '—' }}</td>
+            <td>{{ p.notes or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if booking.invoices %}
+    <div class="admin-card overflow-x-auto">
+      <h2 class="font-display text-lg text-chocolate mb-4">Invoices</h2>
+      <table class="table-admin">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-chocolate/5">
+          {% for inv in booking.invoices %}
+          <tr>
+            <td><a href="{{ url_for('admin.invoices_detail', invoice_id=inv.id) }}" class="text-gold hover:underline">{{ inv.invoice_number }}</a></td>
+            <td>{{ inv.currency }} {{ '%.2f'|format(inv.total) }}</td>
+            <td>{{ inv.currency }} {{ '%.2f'|format(inv.amount_paid) }}</td>
+            <td><span class="badge-neutral">{{ inv.status|replace('_', ' ')|title }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  {# Sidebar actions #}
+  <div class="space-y-6">
+    {% if current_user.has_permission('bookings.update') and booking.booking_status != 'CANCELLED' %}
+    <div class="admin-card">
+      <h2 class="font-display text-lg text-chocolate mb-4">Update Status</h2>
+      <form method="post" class="space-y-4">
+        {{ status_form.hidden_tag() }}
+        <input type="hidden" name="form_name" value="status">
+        <div>
+          {{ status_form.booking_status.label(class_='label') }}
+          {{ status_form.booking_status(class_='input-field') }}
+        </div>
+        <div>
+          {{ status_form.admin_notes.label(class_='label') }}
+          {{ status_form.admin_notes(class_='input-field', rows=3) }}
+        </div>
+        {{ status_form.submit(class_='btn-primary w-full') }}
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_user.has_permission('invoices.create') and booking.booking_status not in ['CANCELLED', 'COMPLETED'] %}
+    <div class="admin-card">
+      <h2 class="font-display text-lg text-chocolate mb-4">Generate Invoice</h2>
+      <form method="post" class="space-y-4">
+        {{ invoice_form.hidden_tag() }}
+        <input type="hidden" name="form_name" value="invoice">
+        <div>
+          {{ invoice_form.discount.label(class_='label') }}
+          {{ invoice_form.discount(class_='input-field') }}
+        </div>
+        <div>
+          {{ invoice_form.due_days.label(class_='label') }}
+          {{ invoice_form.due_days(class_='input-field') }}
+        </div>
+        <div>
+          {{ invoice_form.payment_instructions.label(class_='label') }}
+          {{ invoice_form.payment_instructions(class_='input-field', rows=2) }}
+        </div>
+        <div>
+          {{ invoice_form.terms.label(class_='label') }}
+          {{ invoice_form.terms(class_='input-field', rows=2) }}
+        </div>
+        {{ invoice_form.submit(class_='btn-gold w-full') }}
+        {% if booking.is_service_booking %}
+        <p class="mt-2 text-xs text-ink-muted">Service invoices start at 0. After generating, open the invoice to set prices from the client details.</p>
+        {% endif %}
+      </form>
+    </div>
+    {% endif %}
+
+    {% if current_user.has_permission('bookings.cancel') and booking.booking_status != 'CANCELLED' %}
+    <div class="admin-card border-red-100">
+      <h2 class="font-display text-lg text-red-800 mb-2">Cancel Booking</h2>
+      <p class="text-sm text-ink-muted mb-4">This action cannot be undone. The customer will be notified.</p>
+      <form method="post" action="{{ url_for('admin.bookings_cancel', booking_id=booking.id) }}" onsubmit="return confirm('Cancel this booking?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn-outline w-full border-red-200 text-red-700 hover:border-red-400">Cancel Booking</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('admin.bookings_list') }}" class="btn-outline w-full text-center">Back to Bookings</a>
+  </div>
+</div>
+{% endblock %}

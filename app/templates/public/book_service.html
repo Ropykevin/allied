@@ -1,0 +1,122 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Book ' ~ service.name }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Book: " ~ service.name,
+  eyebrow="Service Request",
+  subtitle="Submit your details below. No payment is required at this step — we will review your request and send an invoice.",
+  image=page_hero_image(service.hero_image)
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page">
+    <div class="grid gap-10 lg:grid-cols-5">
+      <div class="lg:col-span-3">
+        <form
+          method="post"
+          action="{{ url_for('public.book_service', slug=service.slug) }}"
+          class="card p-6 md:p-8"
+          novalidate
+        >
+          {{ form.hidden_tag() }}
+
+          <fieldset class="space-y-5">
+            <legend class="sr-only">Service booking details</legend>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="travelers" class="label">{{ form.travelers.label.text }}</label>
+                <input type="number" name="travelers" id="travelers" class="input-field" min="1" max="50" value="{{ form.travelers.data or 1 }}" required>
+                {% for error in form.travelers.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+              <div>
+                <label for="preferred_travel_date" class="label">{{ form.preferred_travel_date.label.text }}</label>
+                <input type="date" name="preferred_travel_date" id="preferred_travel_date" class="input-field" value="{{ form.preferred_travel_date.data or '' }}">
+                {% for error in form.preferred_travel_date.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <label for="destination_country" class="label">{{ form.destination_country.label.text }}</label>
+              <input type="text" name="destination_country" id="destination_country" class="input-field" value="{{ form.destination_country.data or '' }}" maxlength="120" placeholder="e.g. Kenya, UAE, UK">
+              {% for error in form.destination_country.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="full_name" class="label">{{ form.full_name.label.text }}</label>
+                <input type="text" name="full_name" id="full_name" class="input-field" value="{{ form.full_name.data or '' }}" required maxlength="160" autocomplete="name">
+                {% for error in form.full_name.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+              <div>
+                <label for="phone" class="label">{{ form.phone.label.text }}</label>
+                <input type="tel" name="phone" id="phone" class="input-field" value="{{ form.phone.data or '' }}" required maxlength="40" autocomplete="tel">
+                {% for error in form.phone.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="email" class="label">{{ form.email.label.text }}</label>
+                <input type="email" name="email" id="email" class="input-field" value="{{ form.email.data or '' }}" required maxlength="255" autocomplete="email">
+                {% for error in form.email.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+              <div>
+                <label for="country" class="label">{{ form.country.label.text }}</label>
+                <input type="text" name="country" id="country" class="input-field" value="{{ form.country.data or '' }}" maxlength="120" autocomplete="country-name">
+                {% for error in form.country.errors %}
+                <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <label for="special_requests" class="label">{{ form.special_requests.label.text }}</label>
+              <textarea name="special_requests" id="special_requests" rows="5" class="input-field" maxlength="3000" placeholder="Share travel plans, passport details, visa type, insurance cover needs, etc.">{{ form.special_requests.data or '' }}</textarea>
+              {% for error in form.special_requests.errors %}
+              <p class="mt-1 text-sm text-red-600" role="alert">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-gold w-full sm:w-auto">{{ form.submit.label.text }}</button>
+          </fieldset>
+        </form>
+      </div>
+
+      <aside class="lg:col-span-2 space-y-4">
+        <div class="rounded-xl border border-chocolate/10 bg-cream-soft p-6">
+          <h2 class="font-display text-xl font-semibold">{{ service.name }}</h2>
+          {% if service.short_description %}
+          <p class="mt-2 text-sm leading-relaxed text-ink-muted">{{ service.short_description }}</p>
+          {% endif %}
+          <a href="{{ url_for('public.service_detail', slug=service.slug) }}" class="mt-4 inline-flex text-sm font-medium text-gold hover:underline">View service details</a>
+        </div>
+        <div class="rounded-xl border border-gold/30 bg-gold/10 p-5">
+          <h3 class="font-display text-lg font-semibold text-chocolate">How booking works</h3>
+          <ol class="mt-3 space-y-2 text-sm text-ink-muted">
+            <li>1. Submit your service request</li>
+            <li>2. We review and prepare your quote</li>
+            <li>3. You receive an invoice by email</li>
+            <li>4. Pay externally and we confirm</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

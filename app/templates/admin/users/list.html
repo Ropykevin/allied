@@ -1,0 +1,57 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin Users — {{ company_name }}{% endblock %}
+{% block page_title %}Admin Users{% endblock %}
+
+{% block admin_content %}
+<div class="mb-6 flex justify-end">
+  {% if current_user.has_permission('admins.create') %}
+  <a href="{{ url_for('admin.users_create') }}" class="btn-primary">Add Admin</a>
+  {% endif %}
+</div>
+
+<div class="admin-card overflow-x-auto">
+  {% if admins %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Last Login</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for admin in admins %}
+      <tr class="hover:bg-cream/50">
+        <td class="font-medium text-chocolate">{{ admin.full_name }}</td>
+        <td>{{ admin.email }}</td>
+        <td>{{ admin.role.name if admin.role else '—' }}</td>
+        <td>
+          {% if admin.is_active %}<span class="badge-success">Active</span>{% else %}<span class="badge-danger">Inactive</span>{% endif %}
+        </td>
+        <td>{{ admin.last_login_at.strftime('%d %b %Y') if admin.last_login_at else 'Never' }}</td>
+        <td class="text-right whitespace-nowrap space-x-3">
+          {% if current_user.has_permission('admins.update') %}
+          <a href="{{ url_for('admin.users_edit', admin_id=admin.id) }}" class="text-sm text-gold hover:underline">Edit Role</a>
+          {% endif %}
+          {% if current_user.has_permission('admins.delete') and admin.is_active and admin.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.users_deactivate', admin_id=admin.id) }}" class="inline" onsubmit="return confirm('Deactivate this admin user? They will lose access until reactivated.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-sm text-red-600 hover:underline">Deactivate</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No admin users</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

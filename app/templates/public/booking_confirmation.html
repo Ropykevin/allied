@@ -1,0 +1,92 @@
+{% extends "public/layout.html" %}
+
+{% block title %}{{ seo.title if seo else 'Booking Confirmation' }}{% endblock %}
+
+{% block content %}
+<section class="section surface-warm">
+  <div class="container-page max-w-3xl">
+    <div class="card p-8 md:p-10 text-center">
+      <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-700" aria-hidden="true">
+        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+      </div>
+
+      <h1 class="font-display text-3xl md:text-4xl">Booking Received</h1>
+      <p class="mt-3 text-ink-muted">Thank you{% if booking.customer %}, {{ booking.customer.full_name }}{% endif %}. Your request has been submitted successfully.</p>
+
+      <div class="mt-8 rounded-lg border border-chocolate/10 bg-cream p-6 text-left">
+        <dl class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Reference</dt>
+            <dd class="mt-1 font-display text-xl font-bold text-chocolate">{{ booking.reference }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Status</dt>
+            <dd class="mt-1">
+              {% set status = booking.booking_status %}
+              {% set kind = 'booking' %}
+              {% include 'components/status_badge.html' %}
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">{% if booking.is_service_booking %}Service{% else %}Tour{% endif %}</dt>
+            <dd class="mt-1 font-medium">{{ booking.display_title }}</dd>
+          </div>
+          {% if booking.is_service_booking %}
+          {% if booking.preferred_travel_date %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Preferred Date</dt>
+            <dd class="mt-1">{{ booking.preferred_travel_date.strftime('%d %B %Y') }}</dd>
+          </div>
+          {% endif %}
+          {% if booking.destination_country %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Destination</dt>
+            <dd class="mt-1">{{ booking.destination_country }}</dd>
+          </div>
+          {% endif %}
+          {% else %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Departure</dt>
+            <dd class="mt-1">{{ booking.departure.departure_date.strftime('%d %B %Y') if booking.departure else '—' }}</dd>
+          </div>
+          {% endif %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Travelers</dt>
+            <dd class="mt-1">
+              {% if booking.is_service_booking %}
+              {{ booking.adults }} traveler{% if booking.adults != 1 %}s{% endif %}
+              {% else %}
+              {{ booking.adults }} adult{% if booking.adults != 1 %}s{% endif %}{% if booking.children %}, {{ booking.children }} child{% if booking.children != 1 %}ren{% endif %}{% endif %}
+              {% endif %}
+            </dd>
+          </div>
+          {% if not booking.is_service_booking %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Estimated Total</dt>
+            <dd class="mt-1 font-display text-lg font-semibold">{{ booking.currency }} {{ "{:,.2f}".format(booking.estimated_total) }}</dd>
+          </div>
+          {% else %}
+          <div>
+            <dt class="text-xs font-semibold uppercase tracking-wider text-ink-muted">Quote</dt>
+            <dd class="mt-1 text-sm text-ink-muted">We will send a tailored invoice after review.</dd>
+          </div>
+          {% endif %}
+        </dl>
+      </div>
+
+      <div class="mt-8 rounded-lg border border-gold/30 bg-gold/10 p-5 text-left">
+        <h2 class="font-display text-lg font-semibold text-chocolate">Awaiting Invoice</h2>
+        <p class="mt-2 text-sm leading-relaxed text-ink-muted">
+          Our team is reviewing your booking. You will receive an invoice by email with payment instructions once your request is processed. No payment is required until then.
+        </p>
+        <p class="mt-2 text-sm text-ink-muted">Save your reference <strong class="text-chocolate">{{ booking.reference }}</strong> to check status anytime.</p>
+      </div>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="{{ url_for('public.check_booking') }}" class="btn-primary">Check Booking Status</a>
+        <a href="{{ url_for('public.tours') }}" class="btn-outline">Browse More Tours</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

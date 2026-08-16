@@ -1,0 +1,45 @@
+{% extends "public/layout.html" %}
+{% from "components/page_hero.html" import page_hero with context %}
+
+{% block title %}{{ seo.title if seo else 'Terms & Conditions' }}{% endblock %}
+
+{% block content %}
+{{ page_hero(
+  "Terms & Conditions",
+  eyebrow="Legal",
+  subtitle="Last updated: August 2026",
+  image=page_hero_image()
+) }}
+
+<section class="section surface-warm">
+  <div class="container-page max-w-3xl">
+    <div class="prose prose-ink max-w-none prose-headings:font-display prose-headings:text-chocolate">
+      <p>These Terms &amp; Conditions govern your use of the {{ company_name }} website and the booking of travel services through us. By submitting a booking request or using our services, you agree to these terms.</p>
+
+      <h2>1. Booking Process</h2>
+      <p>Submitting a booking request through our website does not constitute a confirmed reservation. All bookings are subject to availability and review by our team. A booking is confirmed only when you receive written confirmation from {{ company_name }} and, where applicable, complete payment per your invoice.</p>
+
+      <h2>2. Pricing &amp; Invoices</h2>
+      <p>Prices displayed on our website are indicative starting prices and may vary by departure date, group size, and season. Final pricing is confirmed on your invoice. All amounts are quoted in the currency stated on the invoice unless otherwise agreed in writing.</p>
+
+      <h2>3. Payment</h2>
+      <p>Payment terms, methods, and due dates are specified on each invoice. Failure to pay by the due date may result in cancellation of your booking and forfeiture of any deposit, subject to our cancellation policy.</p>
+
+      <h2>4. Cancellations &amp; Changes</h2>
+      <p>Cancellation and amendment policies vary by tour and departure. Please contact us as soon as possible if you need to change or cancel your booking. Refunds, where applicable, are processed according to the policy communicated at the time of confirmation.</p>
+
+      <h2>5. Travel Documents &amp; Health</h2>
+      <p>You are responsible for ensuring valid passports, visas, vaccinations, and travel insurance required for your destination. {{ company_name }} is not liable for denied entry or additional costs arising from incomplete documentation.</p>
+
+      <h2>6. Liability</h2>
+      <p>While we work with reputable partners, {{ company_name }} acts as an agent arranging travel services. We are not liable for acts, errors, omissions, or negligence of third-party suppliers, nor for events beyond our reasonable control including weather, political unrest, or natural disasters.</p>
+
+      <h2>7. Travel Insurance</h2>
+      <p>We strongly recommend comprehensive travel insurance covering cancellation, medical expenses, and personal belongings for the duration of your trip.</p>
+
+      <h2>8. Contact</h2>
+      <p>For questions about these terms, contact us at {% if company_email %}<a href="mailto:{{ company_email }}">{{ company_email }}</a>{% else %}our contact page{% endif %} or via our <a href="{{ url_for('public.contact') }}">contact form</a>.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

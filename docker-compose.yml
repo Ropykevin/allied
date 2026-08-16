@@ -1,0 +1,78 @@
+# Allied Tours & Travel — Docker Compose (production-oriented)
+#
+# Quick start:
+#   cp .env.example .env   # set SECRET_KEY (>=32) and POSTGRES_PASSWORD
+#   ./deployment.sh deploy
+#
+# Optional first-time seed (creates Super Admin from SEED_ADMIN_*):
+#   RUN_SEED=1 SEED_DEMO_USERS=false ./deployment.sh up
+#   # or: ./deployment.sh seed
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-allied_tours}
+      POSTGRES_USER: ${POSTGRES_USER:-allied}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Keep DB off the public host network by default.
+    # For local debugging only, uncomment:
+    # ports:
+    #   - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-allied} -d ${POSTGRES_DB:-allied_tours}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - allied_net
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: allied-tours-web:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: production
+      FLASK_APP: run.py
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-allied}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-allied_tours}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+      RUN_SEED: ${RUN_SEED:-0}
+      SEED_DEMO_USERS: ${SEED_DEMO_USERS:-false}
+      WEB_WORKERS: ${WEB_WORKERS:-3}
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - upload_data:/app/app/static/uploads
+      - instance_data:/app/instance
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=5)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    command: >
+      sh -c "flask db upgrade &&
+             if [ \"$$RUN_SEED\" = \"1\" ]; then flask seed; fi &&
+             gunicorn --bind 0.0.0.0:8000 --workers $${WEB_WORKERS:-3} --timeout 120 --forwarded-allow-ips='*' --access-logfile - --error-logfile - run:app"
+    networks:
+      - allied_net
+
+networks:
+  allied_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  upload_data:
+  instance_data:

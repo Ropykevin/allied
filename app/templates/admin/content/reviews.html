@@ -1,0 +1,81 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Testimonials — {{ company_name }}{% endblock %}
+{% block page_title %}Testimonials{% endblock %}
+
+{% block admin_content %}
+<div class="grid gap-6 lg:grid-cols-3">
+  {% if current_user.has_permission('content.create') %}
+  <div class="admin-card lg:col-span-1 h-fit">
+    <h2 class="font-display text-lg text-chocolate mb-4">Add Testimonial</h2>
+    <form method="post" class="space-y-4">
+      {{ form.hidden_tag() }}
+      <div>
+        {{ form.customer_name.label(class_='label') }}
+        {{ form.customer_name(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.rating.label(class_='label') }}
+        {{ form.rating(class_='input-field', min=1, max=5) }}
+      </div>
+      <div>
+        {{ form.tour_id.label(class_='label') }}
+        {{ form.tour_id(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.body.label(class_='label') }}
+        {{ form.body(class_='input-field', rows=4) }}
+      </div>
+      <div class="flex flex-wrap gap-4">
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          {{ form.is_featured(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+          {{ form.is_featured.label(class_='label mb-0 cursor-pointer') }}
+        </label>
+      </div>
+      {{ form.submit(class_='btn-primary w-full') }}
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="{% if current_user.has_permission('content.create') %}lg:col-span-2{% else %}lg:col-span-3{% endif %} space-y-4">
+    {% if reviews %}
+    {% for review in reviews %}
+    <div class="admin-card">
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p class="font-medium text-chocolate">{{ review.customer_name }}</p>
+          <p class="text-xs text-ink-muted">{{ review.tour.name if review.tour else 'General' }}{% if review.is_demo %} · Demo{% endif %}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-gold font-semibold">{{ review.rating }}/5</span>
+          {% if review.is_published %}<span class="badge-success">Published</span>{% else %}<span class="badge-neutral">Draft</span>{% endif %}
+          {% if review.is_featured %}<span class="badge-info">Featured</span>{% endif %}
+        </div>
+      </div>
+      <p class="mt-3 text-sm text-ink leading-relaxed">{{ review.body }}</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        {% if current_user.has_permission('content.update') %}
+        <a href="{{ url_for('admin.reviews_edit', review_id=review.id) }}" class="btn-outline text-xs px-3 py-1.5">Edit</a>
+        {% endif %}
+        {% if current_user.has_permission('content.delete') %}
+        <form method="post" action="{{ url_for('admin.reviews_delete', review_id=review.id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn-ghost text-xs px-3 py-1.5 text-red-700 hover:bg-red-50" data-confirm="Delete this testimonial?">Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="admin-card py-16 text-center">
+      <p class="font-display text-lg text-chocolate">No testimonials yet</p>
+      <p class="mt-1 text-sm text-ink-muted">Add genuine customer reviews to build trust.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

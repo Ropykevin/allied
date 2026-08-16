@@ -1,0 +1,66 @@
+{% set endpoint = request.endpoint or '' %}
+<header class="sticky top-0 z-40 border-b border-chocolate/10 bg-cream-soft/90 backdrop-blur-md" role="banner">
+  <nav class="container-page flex h-18 items-center justify-between gap-3 md:h-20" aria-label="Main navigation">
+    <a href="{{ url_for('public.home') }}" class="flex shrink-0 items-center focus-visible:outline-gold" aria-label="{{ company_name }} — Home">
+      <img
+        src="{{ url_for('static', filename='assets/brand/logo-primary.png') }}"
+        alt="{{ company_name }}"
+        class="h-11 w-auto object-contain md:h-12"
+        width="200"
+        height="48"
+      >
+    </a>
+
+    {# Desktop links #}
+    <div class="hidden items-center lg:flex">
+      <a href="{{ url_for('public.home') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.home' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Home</a>
+      <a href="{{ url_for('public.tours') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint.startswith('public.tour') %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Tours</a>
+      <a href="{{ url_for('public.destinations') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint.startswith('public.destination') %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Destinations</a>
+      <a href="{{ url_for('public.services') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.services' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Services</a>
+      <a href="{{ url_for('public.about') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.about' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">About</a>
+      <a href="{{ url_for('public.gallery') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.gallery' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Gallery</a>
+      <a href="{{ url_for('public.blog') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint and endpoint.startswith('public.blog') %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Blog</a>
+      <a href="{{ url_for('public.partners') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.partners' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Partners</a>
+      <a href="{{ url_for('public.contact') }}" class="rounded-md px-2.5 py-2 text-sm font-medium transition xl:px-3 {% if endpoint == 'public.contact' %}text-gold{% else %}text-ink hover:text-gold{% endif %}">Contact</a>
+    </div>
+
+    <div class="hidden items-center gap-2 lg:flex xl:gap-3">
+      <a href="{{ url_for('public.check_booking') }}" class="btn-outline px-3 py-2 text-xs xl:text-sm">Check Booking</a>
+      <a href="{{ url_for('public.tours') }}" class="btn-gold px-3 py-2 text-xs xl:text-sm">Book a Tour</a>
+    </div>
+
+    {# Mobile menu toggle #}
+    <button
+      type="button"
+      class="inline-flex items-center justify-center rounded-md p-2 text-chocolate hover:bg-chocolate/5 lg:hidden"
+      data-mobile-toggle
+      aria-expanded="false"
+      aria-controls="mobile-nav-panel"
+      aria-label="Open menu"
+    >
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+    </button>
+  </nav>
+
+  {# Mobile panel #}
+  <div id="mobile-nav-panel" class="hidden border-t border-chocolate/10 bg-cream lg:hidden" data-mobile-menu>
+    <div class="container-page space-y-1 py-4">
+      <a href="{{ url_for('public.home') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.home' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Home</a>
+      <a href="{{ url_for('public.tours') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint.startswith('public.tour') %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Tours</a>
+      <a href="{{ url_for('public.destinations') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint.startswith('public.destination') %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Destinations</a>
+      <a href="{{ url_for('public.services') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.services' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Services</a>
+      <a href="{{ url_for('public.about') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.about' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">About</a>
+      <a href="{{ url_for('public.gallery') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.gallery' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Gallery</a>
+      <a href="{{ url_for('public.blog') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint and endpoint.startswith('public.blog') %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Blog</a>
+      <a href="{{ url_for('public.partners') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.partners' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Partners</a>
+      <a href="{{ url_for('public.faqs') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.faqs' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">FAQs</a>
+      <a href="{{ url_for('public.contact') }}" class="block rounded-md px-3 py-2.5 text-sm font-medium {% if endpoint == 'public.contact' %}bg-gold/15 text-gold{% else %}text-ink hover:bg-chocolate/5{% endif %}">Contact</a>
+      <div class="flex flex-col gap-2 pt-4">
+        <a href="{{ url_for('public.check_booking') }}" class="btn-outline w-full">Check Booking</a>
+        <a href="{{ url_for('public.tours') }}" class="btn-gold w-full">Book a Tour</a>
+      </div>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,55 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{% if post %}Edit Post{% else %}New Post{% endif %} — {{ company_name }}{% endblock %}
+{% block page_title %}{% if post %}Edit Post{% else %}New Post{% endif %}{% endblock %}
+
+{% block admin_content %}
+<form method="post" enctype="multipart/form-data" class="max-w-3xl space-y-6">
+  {{ form.hidden_tag() }}
+
+  <div class="admin-card space-y-5">
+    <div>
+      {{ form.title.label(class_='label') }}
+      {{ form.title(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.slug.label(class_='label') }}
+      {{ form.slug(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.excerpt.label(class_='label') }}
+      {{ form.excerpt(class_='input-field') }}
+    </div>
+    <div>
+      {{ form.body.label(class_='label') }}
+      {{ form.body(class_='input-field', rows=12) }}
+    </div>
+    <div>
+      {{ form.featured_image_file.label(class_='label') }}
+      {{ form.featured_image_file(class_='input-field') }}
+      {% if post and post.featured_image %}
+      <p class="mt-1 text-xs text-ink-muted">Current: {{ post.featured_image }}</p>
+      {% endif %}
+    </div>
+    <label class="flex items-center gap-2">
+      {{ form.is_published(class_='rounded border-chocolate/20 text-gold focus:ring-gold') }}
+      {{ form.is_published.label(class_='label mb-0 cursor-pointer') }}
+    </label>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        {{ form.seo_title.label(class_='label') }}
+        {{ form.seo_title(class_='input-field') }}
+      </div>
+      <div>
+        {{ form.seo_description.label(class_='label') }}
+        {{ form.seo_description(class_='input-field') }}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    {{ form.submit(class_='btn-primary') }}
+    <a href="{{ url_for('admin.blog_list') }}" class="btn-outline">Cancel</a>
+  </div>
+</form>
+{% endblock %}

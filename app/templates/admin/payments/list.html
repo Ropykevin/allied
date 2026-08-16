@@ -1,0 +1,61 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Payments — {{ company_name }}{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card overflow-x-auto">
+  {% if payments %}
+  <table class="table-admin">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Invoice</th>
+        <th>Customer</th>
+        <th>Method</th>
+        <th>Reference</th>
+        <th>Amount</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-chocolate/5">
+      {% for payment in payments %}
+      <tr class="hover:bg-cream/50">
+        <td>{{ payment.payment_date.strftime('%d %b %Y') if payment.payment_date else '—' }}</td>
+        <td>
+          <a href="{{ url_for('admin.invoices_detail', invoice_id=payment.invoice_id) }}" class="text-gold hover:underline">
+            {{ payment.invoice.invoice_number if payment.invoice else payment.invoice_id }}
+          </a>
+        </td>
+        <td>{{ payment.invoice.customer.full_name if payment.invoice and payment.invoice.customer else '—' }}</td>
+        <td>{{ payment.method }}</td>
+        <td>{{ payment.transaction_reference or '—' }}</td>
+        <td>{{ payment.currency }} {{ '%.2f'|format(payment.amount) }}</td>
+        <td><span class="badge-neutral">{{ payment.status|title }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if pagination.pages > 1 %}
+  <div class="mt-4 flex items-center justify-between border-t border-chocolate/10 pt-4 text-sm">
+    <span class="text-ink-muted">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('admin.payments_list', page=pagination.prev_num) }}" class="btn-outline py-1.5 px-3">Previous</a>
+      {% endif %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('admin.payments_list', page=pagination.next_num) }}" class="btn-outline py-1.5 px-3">Next</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="py-16 text-center">
+    <p class="font-display text-lg text-chocolate">No payments recorded</p>
+    <p class="mt-1 text-sm text-ink-muted">Payments are recorded against invoices.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
