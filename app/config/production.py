@@ -48,7 +48,10 @@ class ProductionConfig:
     SOCIAL_INSTAGRAM = os.getenv("SOCIAL_INSTAGRAM", "")
     SOCIAL_TWITTER = os.getenv("SOCIAL_TWITTER", "")
     SOCIAL_YOUTUBE = os.getenv("SOCIAL_YOUTUBE", "")
-    GOOGLE_SITE_VERIFICATION = os.getenv("GOOGLE_SITE_VERIFICATION", "")
+    GOOGLE_SITE_VERIFICATION = os.getenv(
+        "GOOGLE_SITE_VERIFICATION",
+        "ajC1R_45-SLiI2qSeOy-V5c2lJurjySBl6LQNI2vbeo",
+    )
 
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "app/static/uploads")
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(16 * 1024 * 1024)))
