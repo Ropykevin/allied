@@ -194,7 +194,10 @@ def _register_context_processors(app: Flask) -> None:
         def _gallery_paths() -> list[str]:
             try:
                 rows = (
-                    GalleryImage.query.filter(GalleryImage.is_published.is_(True))
+                    GalleryImage.query.filter(
+                        GalleryImage.is_published.is_(True),
+                        GalleryImage.media_type == "image",
+                    )
                     .order_by(
                         GalleryImage.is_featured.desc(),
                         GalleryImage.sort_order,

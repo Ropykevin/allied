@@ -57,8 +57,10 @@ class DevelopmentConfig:
     )
 
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "app/static/uploads")
-    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(16 * 1024 * 1024)))
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(64 * 1024 * 1024)))
+    MAX_VIDEO_BYTES = int(os.getenv("MAX_VIDEO_BYTES", str(64 * 1024 * 1024)))
     ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+    ALLOWED_VIDEO_EXTENSIONS = {"mp4", "webm", "mov"}
 
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
     RATELIMIT_DEFAULT = "200 per hour"

@@ -20,7 +20,7 @@ from app.models.mixins import utcnow
 from app.utils.audit import log_action
 from app.utils.helpers import slugify
 from app.utils.sanitize import safe_external_url
-from app.utils.uploads import UploadError, delete_upload, has_upload, save_image
+from app.utils.uploads import UploadError, delete_upload, has_upload, save_gallery_media, save_image
 
 
 @bp.route("/content/blog")
@@ -108,7 +108,7 @@ def gallery_list():
         if form.csrf_token.errors:
             flash("Security check failed. Please try uploading again.", "danger")
         elif not files:
-            flash("Select at least one image to upload.", "danger")
+            flash("Select at least one photo or video to upload.", "danger")
         else:
             saved = 0
             errors = []
@@ -116,8 +116,8 @@ def gallery_list():
             base_sort = form.sort_order.data or 0
             for index, file in enumerate(files):
                 try:
-                    path = save_image(file, "gallery")
-                    original = (file.filename or "image").rsplit(".", 1)[0]
+                    path, media_type = save_gallery_media(file)
+                    original = (file.filename or "media").rsplit(".", 1)[0]
                     title = base_title
                     if len(files) > 1:
                         title = f"{base_title} ({index + 1})" if base_title else original
@@ -130,7 +130,9 @@ def gallery_list():
                         sort_order=base_sort + index,
                         is_published=form.is_published.data,
                         is_featured=form.is_featured.data,
+                        is_hero=form.is_hero.data if media_type == "image" else False,
                         image_path=path,
+                        media_type=media_type,
                     )
                     db.session.add(image)
                     saved += 1
@@ -138,8 +140,11 @@ def gallery_list():
                     errors.append(f"{file.filename}: {exc}")
             if saved:
                 db.session.commit()
-                log_action("gallery.uploaded", "gallery", None, f"{saved} image(s)")
-                flash(f"{saved} image{'s' if saved != 1 else ''} uploaded to the gallery.", "success")
+                log_action("gallery.uploaded", "gallery", None, f"{saved} media item(s)")
+                flash(
+                    f"{saved} item{'s' if saved != 1 else ''} uploaded to the gallery.",
+                    "success",
+                )
             if errors:
                 flash("Some uploads failed: " + "; ".join(errors[:3]), "danger")
             if saved:
@@ -164,15 +169,19 @@ def gallery_edit(image_id: int):
         if has_upload(form.image_file.data):
             try:
                 old_path = image.image_path
-                image.image_path = save_image(form.image_file.data, "gallery")
+                path, media_type = save_gallery_media(form.image_file.data)
+                image.image_path = path
+                image.media_type = media_type
                 if old_path and old_path.startswith("uploads/"):
                     delete_upload(old_path)
             except UploadError as exc:
                 flash(str(exc), "danger")
                 return render_template("admin/content/gallery_edit.html", form=form, image=image)
+        # Hero slideshow is photo-only
+        image.is_hero = bool(form.is_hero.data) and image.is_image
         db.session.commit()
         log_action("gallery.updated", "gallery", image.id, image.title)
-        flash("Gallery image updated.", "success")
+        flash("Gallery item updated.", "success")
         return redirect(url_for("admin.gallery_list"))
     return render_template("admin/content/gallery_edit.html", form=form, image=image)
 
@@ -189,7 +198,7 @@ def gallery_delete(image_id: int):
     if path and path.startswith("uploads/"):
         delete_upload(path)
     log_action("gallery.deleted", "gallery", image_id, title)
-    flash("Gallery image deleted.", "success")
+    flash("Gallery item deleted.", "success")
     return redirect(url_for("admin.gallery_list"))
 
 

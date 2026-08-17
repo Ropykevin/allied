@@ -113,8 +113,9 @@
     var gallery = items.map(function (item) {
       return {
         src: item.getAttribute("href") || item.getAttribute("data-src") || "",
+        type: item.getAttribute("data-gallery-type") || "image",
         title: item.getAttribute("data-gallery-title") || "",
-        alt: item.getAttribute("data-gallery-alt") || "Gallery image",
+        alt: item.getAttribute("data-gallery-alt") || "Gallery media",
       };
     }).filter(function (entry) {
       return !!entry.src;
@@ -123,27 +124,50 @@
     if (!gallery.length) return;
 
     var overlay = null;
-    var imgEl = null;
+    var mediaWrap = null;
     var captionEl = null;
     var counterEl = null;
     var current = 0;
+    var activeMedia = null;
 
     function closeLightbox() {
       if (!overlay) return;
+      if (activeMedia && activeMedia.pause) {
+        try { activeMedia.pause(); } catch (e) { /* ignore */ }
+      }
       document.removeEventListener("keydown", onKey);
       overlay.remove();
       overlay = null;
+      activeMedia = null;
       document.body.style.overflow = "";
     }
 
     function show(index) {
-      if (!gallery.length) return;
+      if (!gallery.length || !mediaWrap) return;
       current = (index + gallery.length) % gallery.length;
       var entry = gallery[current];
-      if (imgEl) {
-        imgEl.src = entry.src;
-        imgEl.alt = entry.alt;
+      mediaWrap.innerHTML = "";
+      activeMedia = null;
+
+      if (entry.type === "video") {
+        var video = document.createElement("video");
+        video.setAttribute("controls", "");
+        video.setAttribute("playsinline", "");
+        video.setAttribute("preload", "metadata");
+        video.className = "max-h-[78vh] max-w-full rounded-lg object-contain shadow-soft bg-black";
+        video.src = entry.src;
+        mediaWrap.appendChild(video);
+        activeMedia = video;
+        video.play().catch(function () { /* autoplay may be blocked */ });
+      } else {
+        var img = document.createElement("img");
+        img.alt = entry.alt;
+        img.className = "max-h-[78vh] max-w-full rounded-lg object-contain shadow-soft";
+        img.src = entry.src;
+        mediaWrap.appendChild(img);
+        activeMedia = img;
       }
+
       if (captionEl) {
         captionEl.textContent = entry.title || "";
         captionEl.classList.toggle("hidden", !entry.title);
@@ -166,19 +190,19 @@
         "fixed inset-0 z-[60] flex items-center justify-center bg-chocolate/92 p-4";
       overlay.setAttribute("role", "dialog");
       overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-label", "Image gallery viewer");
+      overlay.setAttribute("aria-label", "Gallery viewer");
       overlay.innerHTML =
         '<button type="button" data-lightbox-close class="absolute right-4 top-4 z-10 rounded-full bg-cream/10 px-3 py-1 text-2xl leading-none text-white hover:bg-cream/20" aria-label="Close">&times;</button>' +
-        '<button type="button" data-lightbox-prev class="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-cream/10 px-3 py-2 text-xl text-white hover:bg-cream/20 md:left-6" aria-label="Previous image">‹</button>' +
-        '<button type="button" data-lightbox-next class="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-cream/10 px-3 py-2 text-xl text-white hover:bg-cream/20 md:right-6" aria-label="Next image">›</button>' +
+        '<button type="button" data-lightbox-prev class="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-cream/10 px-3 py-2 text-xl text-white hover:bg-cream/20 md:left-6" aria-label="Previous">‹</button>' +
+        '<button type="button" data-lightbox-next class="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-cream/10 px-3 py-2 text-xl text-white hover:bg-cream/20 md:right-6" aria-label="Next">›</button>' +
         '<div class="flex max-h-[90vh] max-w-5xl flex-col items-center gap-3">' +
-        '<img data-lightbox-image src="" alt="" class="max-h-[78vh] max-w-full rounded-lg object-contain shadow-soft">' +
+        '<div data-lightbox-media class="flex max-h-[78vh] max-w-full items-center justify-center"></div>' +
         '<p data-lightbox-caption class="text-center text-sm text-cream/90"></p>' +
         '<p data-lightbox-counter class="text-xs text-cream/60"></p>' +
         '<p class="hidden text-xs text-cream/50 md:block">Use ← → keys to browse · Esc to close</p>' +
         "</div>";
 
-      imgEl = overlay.querySelector("[data-lightbox-image]");
+      mediaWrap = overlay.querySelector("[data-lightbox-media]");
       captionEl = overlay.querySelector("[data-lightbox-caption]");
       counterEl = overlay.querySelector("[data-lightbox-counter]");
 

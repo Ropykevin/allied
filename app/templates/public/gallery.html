@@ -7,8 +7,8 @@
 {{ page_hero(
   "Gallery",
   eyebrow="Visual Stories",
-  subtitle="Moments from the trail — wildlife, landscapes, and cultures across our destinations. Click any photo to view more.",
-  image=page_hero_image(images[0].image_path if images else none)
+  subtitle="Moments from the trail — wildlife, landscapes, cultures, and short clips from our journeys.",
+  image=page_hero_image(gallery_hero)
 ) }}
 
 <section class="section surface-warm">
@@ -21,19 +21,32 @@
           href="{{ url_for('static', filename=image.image_path) }}"
           class="group relative block focus-visible:outline-gold"
           data-gallery-item
+          data-gallery-type="{{ 'video' if image.is_video else 'image' }}"
           data-gallery-index="{{ loop.index0 }}"
           data-gallery-title="{{ image.title or '' }}"
-          data-gallery-alt="{{ image.alt_text or image.title or 'Gallery image' }}"
-          aria-label="View {{ image.title or 'gallery image' }} larger"
+          data-gallery-alt="{{ image.alt_text or image.title or 'Gallery media' }}"
+          aria-label="View {{ image.title or 'gallery media' }} larger"
         >
+          {% if image.is_video %}
+          <video
+            src="{{ url_for('static', filename=image.image_path) }}"
+            class="w-full object-cover"
+            muted
+            playsinline
+            preload="metadata"
+            aria-hidden="true"
+          ></video>
+          <span class="pointer-events-none absolute left-3 top-3 rounded bg-chocolate/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-cream">Video</span>
+          {% else %}
           <img
             src="{{ url_for('static', filename=image.image_path) }}"
             alt="{{ image.alt_text or image.title }}"
             class="w-full object-cover transition duration-300 group-hover:opacity-95"
             loading="lazy"
           >
+          {% endif %}
           <span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-chocolate/0 opacity-0 transition group-hover:bg-chocolate/25 group-hover:opacity-100">
-            <span class="rounded-full bg-cream/95 px-3 py-1.5 text-xs font-semibold text-chocolate shadow-soft">View</span>
+            <span class="rounded-full bg-cream/95 px-3 py-1.5 text-xs font-semibold text-chocolate shadow-soft">{{ 'Play' if image.is_video else 'View' }}</span>
           </span>
         </a>
         {% if image.title or image.category %}
@@ -48,7 +61,7 @@
     {% else %}
     <div class="card p-12 text-center">
       <h2 class="font-display text-2xl">Gallery coming soon</h2>
-      <p class="mt-2 text-ink-muted">We are curating photos from our recent journeys.</p>
+      <p class="mt-2 text-ink-muted">We are curating photos and videos from our recent journeys.</p>
     </div>
     {% endif %}
   </div>

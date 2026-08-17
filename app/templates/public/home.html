@@ -98,7 +98,8 @@
       </div>
 
       <div class="relative lg:col-span-6">
-        {% set who_image = (gallery[0].image_path if gallery else none) or (hero_images[0].image_path if hero_images else none) %}
+        {% set who_candidates = (gallery|selectattr('is_image')|list if gallery else []) %}
+        {% set who_image = (who_candidates[0].image_path if who_candidates else none) or (hero_images[0].image_path if hero_images else none) %}
         <div class="relative aspect-[4/5] overflow-hidden sm:aspect-[5/4] lg:aspect-[4/5]">
           {% if who_image %}
           <img
@@ -483,17 +484,30 @@
         href="{{ url_for('static', filename=image.image_path) }}"
         class="group relative aspect-square overflow-hidden focus-visible:outline-gold {% if loop.index == 1 %}md:col-span-2 md:row-span-2 md:aspect-auto md:min-h-full{% endif %}"
         data-gallery-item
+        data-gallery-type="{{ 'video' if image.is_video else 'image' }}"
         data-gallery-index="{{ loop.index0 }}"
         data-gallery-title="{{ image.title or '' }}"
-        data-gallery-alt="{{ image.alt_text or image.title or 'Gallery image' }}"
-        aria-label="View {{ image.title or 'gallery image' }} larger"
+        data-gallery-alt="{{ image.alt_text or image.title or 'Gallery media' }}"
+        aria-label="View {{ image.title or 'gallery media' }} larger"
       >
+        {% if image.is_video %}
+        <video
+          src="{{ url_for('static', filename=image.image_path) }}"
+          class="h-full w-full object-cover"
+          muted
+          playsinline
+          preload="metadata"
+          aria-hidden="true"
+        ></video>
+        <span class="pointer-events-none absolute left-2 top-2 rounded bg-chocolate/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cream">Video</span>
+        {% else %}
         <img
           src="{{ url_for('static', filename=image.image_path) }}"
           alt="{{ image.alt_text or image.title }}"
           class="h-full w-full object-cover transition duration-700 group-hover:scale-105"
           loading="lazy"
         >
+        {% endif %}
         <span class="pointer-events-none absolute inset-0 bg-chocolate/0 transition group-hover:bg-chocolate/25"></span>
       </a>
       {% endfor %}

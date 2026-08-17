@@ -31,7 +31,9 @@ class TestingConfig:
     SOCIAL_TWITTER = ""
     SOCIAL_YOUTUBE = ""
     UPLOAD_FOLDER = "instance/test_uploads"
-    MAX_CONTENT_LENGTH = 2 * 1024 * 1024
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
+    MAX_VIDEO_BYTES = 8 * 1024 * 1024
     ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+    ALLOWED_VIDEO_EXTENSIONS = {"mp4", "webm", "mov"}
     RATELIMIT_ENABLED = False
     RATELIMIT_STORAGE_URI = "memory://"

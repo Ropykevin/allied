@@ -207,18 +207,25 @@ class GalleryForm(FlaskForm):
     category = StringField("Category", validators=[Optional(), Length(max=80)])
     sort_order = IntegerField("Sort Order", default=0)
     is_published = BooleanField("Published", default=True)
-    is_featured = BooleanField("Featured")
+    is_featured = BooleanField("Featured on homepage gallery")
+    is_hero = BooleanField("Show on homepage hero")
     image_files = MultipleFileField(
-        "Images",
+        "Photos & Videos",
         render_kw={
             "multiple": True,
-            "accept": ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp",
+            "accept": (
+                ".jpg,.jpeg,.png,.webp,.mp4,.webm,.mov,"
+                "image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+            ),
         },
         validators=[
-            FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only"),
+            FileAllowed(
+                ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+                "Images (JPG/PNG/WEBP) or videos (MP4/WebM/MOV) only",
+            ),
         ],
     )
-    submit = SubmitField("Upload Images")
+    submit = SubmitField("Upload Media")
 
 
 class GalleryEditForm(FlaskForm):
@@ -227,10 +234,17 @@ class GalleryEditForm(FlaskForm):
     category = StringField("Category", validators=[Optional(), Length(max=80)])
     sort_order = IntegerField("Sort Order", default=0)
     is_published = BooleanField("Published", default=True)
-    is_featured = BooleanField("Featured")
+    is_featured = BooleanField("Featured on homepage gallery")
+    is_hero = BooleanField("Show on homepage hero")
     image_file = FileField(
-        "Replace Image",
-        validators=[Optional(), FileAllowed(["jpg", "jpeg", "png", "webp"], "Images only")],
+        "Replace Media",
+        validators=[
+            Optional(),
+            FileAllowed(
+                ["jpg", "jpeg", "png", "webp", "mp4", "webm", "mov"],
+                "Images (JPG/PNG/WEBP) or videos (MP4/WebM/MOV) only",
+            ),
+        ],
     )
     submit = SubmitField("Save Changes")
 

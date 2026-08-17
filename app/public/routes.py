@@ -91,23 +91,17 @@ def home():
         .limit(8)
         .all()
     )
-    # Hero slideshow: prefer featured gallery images, else any published gallery photos
+    # Hero slideshow: up to 8 photos marked "Show on homepage hero"
     hero_images = (
         GalleryImage.query.filter(
             GalleryImage.is_published.is_(True),
-            GalleryImage.is_featured.is_(True),
+            GalleryImage.is_hero.is_(True),
+            GalleryImage.media_type == "image",
         )
         .order_by(GalleryImage.sort_order, GalleryImage.id.desc())
-        .limit(12)
+        .limit(8)
         .all()
     )
-    if not hero_images:
-        hero_images = (
-            GalleryImage.query.filter(GalleryImage.is_published.is_(True))
-            .order_by(GalleryImage.sort_order, GalleryImage.id.desc())
-            .limit(12)
-            .all()
-        )
     services = (
         Service.query.filter(Service.is_published.is_(True), Service.is_featured.is_(True))
         .order_by(Service.sort_order, Service.id)
@@ -537,12 +531,14 @@ def gallery():
         .order_by(GalleryImage.sort_order, GalleryImage.created_at.desc())
         .all()
     )
+    gallery_hero = next((item.image_path for item in images if item.is_image), None)
     return render_template(
         "public/gallery.html",
         images=images,
+        gallery_hero=gallery_hero,
         seo={
             "title": "Gallery | Allied Tours & Travel",
-            "description": "Travel moments and destinations from Allied Tours & Travel.",
+            "description": "Photos and videos from Allied Tours & Travel journeys.",
         },
     )
 
