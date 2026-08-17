@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ seo.title if seo else company_name }}{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ seo.description if seo else company_tagline }}{% endblock %}">
+  {% if google_site_verification %}
+  <meta name="google-site-verification" content="{{ google_site_verification }}">
+  {% endif %}
   {% if seo and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
   <meta property="og:title" content="{% block og_title %}{{ seo.title if seo else company_name }}{% endblock %}">
   <meta property="og:description" content="{% block og_description %}{{ seo.description if seo else company_tagline }}{% endblock %}">

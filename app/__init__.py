@@ -259,6 +259,7 @@ def _register_context_processors(app: Flask) -> None:
             "social_instagram": app.config.get("SOCIAL_INSTAGRAM") or None,
             "social_twitter": app.config.get("SOCIAL_TWITTER") or None,
             "social_youtube": app.config.get("SOCIAL_YOUTUBE") or None,
+            "google_site_verification": app.config.get("GOOGLE_SITE_VERIFICATION") or None,
             "current_user": current_user,
             "page_hero_image": page_hero_image,
             "hero_image_url": hero_image_url,
