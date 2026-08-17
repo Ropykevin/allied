@@ -40,7 +40,7 @@
           multiple
           required
         >
-        <p class="mt-1 text-xs text-ink-muted">Images: JPG, PNG, WEBP · Videos: MP4, WebM, MOV (max 64&nbsp;MB each). Prefer MP4 for widest browser support.</p>
+        <p class="mt-1 text-xs text-ink-muted">Images: JPG, PNG, WEBP. Videos: MP4, WebM, MOV (max 64 MB each). Prefer MP4 for widest browser support.</p>
         <p class="mt-2 hidden text-sm font-medium text-chocolate" data-file-count></p>
         {% for error in form.image_files.errors %}
         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -67,12 +67,16 @@
   {% endif %}
 
   <div class="{% if current_user.has_permission('content.create') %}lg:col-span-2{% else %}lg:col-span-3{% endif %}">
-    <p class="mb-4 text-sm text-ink-muted">{{ images|length }} item{{ 's' if images|length != 1 else '' }} in gallery</p>
+    <p class="mb-4 text-sm text-ink-muted">
+      {{ images|length }}
+      {% if images|length == 1 %}item{% else %}items{% endif %}
+      in gallery
+    </p>
     {% if images %}
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {% for img in images %}
       <div class="admin-card p-0 overflow-hidden">
-        <div class="aspect-video bg-cream relative">
+        <div class="relative aspect-video bg-cream">
           {% if img.is_video %}
           <video
             src="{{ url_for('static', filename=img.image_path) }}"
@@ -81,28 +85,40 @@
             playsinline
             preload="metadata"
           ></video>
-          <span class="absolute left-2 top-2 rounded bg-chocolate/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cream">Video</span>
+          <span class="absolute left-2 top-2 rounded bg-chocolate/80 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-cream">Video</span>
           {% else %}
-          <img src="{{ url_for('static', filename=img.image_path) }}" alt="{{ img.alt_text or img.title }}" class="h-full w-full object-cover">
+          <img
+            src="{{ url_for('static', filename=img.image_path) }}"
+            alt="{{ img.alt_text or img.title }}"
+            class="h-full w-full object-cover"
+          >
           {% endif %}
         </div>
         <div class="p-4">
-          <p class="font-medium text-chocolate truncate">{{ img.title }}</p>
+          <p class="truncate font-medium text-chocolate">{{ img.title }}</p>
           <p class="text-xs text-ink-muted">{{ img.category or 'Uncategorized' }} · Order {{ img.sort_order }}</p>
           <div class="mt-2 flex flex-wrap gap-2">
-            {% if img.is_published %}<span class="badge-success">Live</span>{% else %}<span class="badge-neutral">Hidden</span>{% endif %}
+            {% if img.is_published %}
+            <span class="badge-success">Live</span>
+            {% else %}
+            <span class="badge-neutral">Hidden</span>
+            {% endif %}
             {% if img.is_featured %}<span class="badge-info">Featured</span>{% endif %}
             {% if img.is_hero %}<span class="badge-info">Hero</span>{% endif %}
             {% if img.is_video %}<span class="badge-info">Video</span>{% endif %}
           </div>
           <div class="mt-4 flex flex-wrap gap-2">
             {% if current_user.has_permission('content.update') %}
-            <a href="{{ url_for('admin.gallery_edit', image_id=img.id) }" class="btn-outline text-xs px-3 py-1.5">Edit</a>
+            <a href="{{ url_for('admin.gallery_edit', image_id=img.id) }}" class="btn-outline px-3 py-1.5 text-xs">Edit</a>
             {% endif %}
             {% if current_user.has_permission('content.delete') %}
             <form method="post" action="{{ url_for('admin.gallery_delete', image_id=img.id) }}" class="inline">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn-ghost text-xs px-3 py-1.5 text-red-700 hover:bg-red-50" data-confirm="Delete this gallery item? This cannot be undone.">Delete</button>
+              <button
+                type="submit"
+                class="btn-ghost px-3 py-1.5 text-xs text-red-700 hover:bg-red-50"
+                data-confirm="Delete this gallery item? This cannot be undone."
+              >Delete</button>
             </form>
             {% endif %}
           </div>
