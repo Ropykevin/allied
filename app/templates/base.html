@@ -15,7 +15,12 @@
   <meta property="og:image" content="{{ url_for('static', filename=seo.og_image, _external=True) }}">
   {% endif %}
   {% if seo and seo.noindex %}<meta name="robots" content="noindex,nofollow">{% endif %}
-  <link rel="icon" href="{{ url_for('static', filename='assets/brand/favicon.png') }}" type="image/png">
+  <link rel="icon" href="{{ url_for('static', filename='assets/brand/favicon.ico') }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='assets/brand/favicon-48.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='assets/brand/favicon-32.png') }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='assets/brand/icon-192.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='assets/brand/apple-touch-icon.png') }}">
+  <meta name="theme-color" content="#412919">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">

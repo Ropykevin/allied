@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from pathlib import Path
 
 from flask import (
     Response,
@@ -639,6 +640,15 @@ def privacy():
         "public/privacy.html",
         seo={"title": "Privacy Policy | Allied Tours & Travel"},
     )
+
+
+@bp.route("/favicon.ico")
+def favicon():
+    """Browsers and Google often request /favicon.ico at the site root."""
+    from flask import send_from_directory
+
+    static_brand = Path(current_app.root_path) / "static" / "assets" / "brand"
+    return send_from_directory(static_brand, "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
 @bp.route("/robots.txt")
