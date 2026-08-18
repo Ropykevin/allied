@@ -454,27 +454,26 @@
     });
   }
 
-  function initPartnerSlider() {
-    initCarousel({
-      root: "[data-partner-slider]",
-      track: "[data-partner-track]",
-      slide: "[data-partner-slide]",
-      dots: "[data-partner-dots]",
-      prev: "[data-partner-prev]",
-      next: "[data-partner-next]",
-      intervalAttr: "data-partner-interval",
-      defaultInterval: 5000,
-      dotAttr: "data-partner-dot",
-      inactiveDot: "bg-chocolate/20",
-      label: "partners page",
-      perView: function (count) {
-        var w = window.innerWidth;
-        if (w >= 1280) return Math.min(5, count);
-        if (w >= 1024) return Math.min(4, count);
-        if (w >= 640) return Math.min(3, count);
-        return Math.min(2, count);
-      },
-    });
+  function initPartnerMarquee() {
+    // Continuous scroll is CSS-driven; sync pause if reduced-motion changes.
+    var roots = qsa("[data-partner-marquee]");
+    if (!roots.length) return;
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function sync() {
+      roots.forEach(function (root) {
+        var track = qs(".partner-marquee__track", root);
+        if (!track) return;
+        if (reduce.matches) {
+          track.style.animationPlayState = "paused";
+        } else {
+          track.style.animationPlayState = "";
+        }
+      });
+    }
+    sync();
+    if (typeof reduce.addEventListener === "function") {
+      reduce.addEventListener("change", sync);
+    }
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -484,7 +483,7 @@
     initGalleryLightbox();
     initHeroSlideshow();
     initTestimonialSlider();
-    initPartnerSlider();
+    initPartnerMarquee();
     initRevealOnScroll();
   });
 

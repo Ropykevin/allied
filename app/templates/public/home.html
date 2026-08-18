@@ -351,6 +351,7 @@
 {# ── Partners ── #}
 {% set logo_partners = partners|selectattr('logo_path')|list if partners else [] %}
 {% if logo_partners %}
+{% from "components/partner_marquee.html" import partner_marquee with context %}
 <section class="section surface-sand" aria-labelledby="partners-heading" data-reveal>
   <div class="container-page">
     <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -358,56 +359,10 @@
         <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gold">Trusted network</p>
         <h2 id="partners-heading" class="mt-3 font-display text-3xl md:text-4xl">Our Partners</h2>
       </div>
-      <div class="flex flex-wrap items-center gap-3">
-        {% if logo_partners|length > 1 %}
-        <div class="flex items-center gap-2">
-          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-prev aria-label="Previous partners">‹</button>
-          <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-next aria-label="Next partners">›</button>
-        </div>
-        {% endif %}
-        <a href="{{ url_for('public.partners') }}" class="btn-outline shrink-0">View Partners</a>
-      </div>
+      <a href="{{ url_for('public.partners') }}" class="btn-outline shrink-0">View Partners</a>
     </div>
 
-    <div
-      class="relative"
-      data-partner-slider
-      data-partner-interval="5000"
-      data-partner-count="{{ logo_partners|length }}"
-    >
-      <div class="overflow-hidden" data-partner-viewport>
-        <div class="flex transition-transform duration-500 ease-out" data-partner-track>
-          {% for partner in logo_partners %}
-          <div class="w-1/2 shrink-0 px-2 sm:w-1/3 lg:w-1/4 xl:w-1/5" data-partner-slide>
-            <div class="flex h-36 items-center justify-center border border-chocolate/10 bg-cream-soft px-4 py-6 sm:h-40">
-              {% set partner_url = partner.website_url|safe_url %}
-              {% if partner_url %}
-              <a href="{{ partner_url }}" target="_blank" rel="noopener noreferrer" class="block" aria-label="{{ partner.name }}">
-                <img
-                  src="{{ url_for('static', filename=partner.logo_path) }}"
-                  alt="{{ partner.name }}"
-                  class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain transition duration-300 hover:scale-105 sm:h-20 sm:max-h-24 sm:max-w-[200px]"
-                  loading="lazy"
-                >
-              </a>
-              {% else %}
-              <img
-                src="{{ url_for('static', filename=partner.logo_path) }}"
-                alt="{{ partner.name }}"
-                class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain sm:h-20 sm:max-h-24 sm:max-w-[200px]"
-                loading="lazy"
-              >
-              {% endif %}
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      {% if logo_partners|length > 1 %}
-      <div class="mt-6 flex justify-center gap-2" data-partner-dots aria-hidden="true"></div>
-      {% endif %}
-    </div>
+    {{ partner_marquee(logo_partners) }}
   </div>
 </section>
 {% endif %}

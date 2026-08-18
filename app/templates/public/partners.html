@@ -1,5 +1,6 @@
 {% extends "public/layout.html" %}
 {% from "components/page_hero.html" import page_hero with context %}
+{% from "components/partner_marquee.html" import partner_marquee with context %}
 
 {% block title %}{{ seo.title if seo else 'Our Partners' }}{% endblock %}
 
@@ -15,52 +16,7 @@
   <div class="container-page">
     {% set logo_partners = partners|selectattr('logo_path')|list %}
     {% if logo_partners %}
-    <div class="mb-8 flex items-center justify-end gap-2">
-      {% if logo_partners|length > 1 %}
-      <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-prev aria-label="Previous partners">‹</button>
-      <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold" data-partner-next aria-label="Next partners">›</button>
-      {% endif %}
-    </div>
-
-    <div
-      class="relative"
-      data-partner-slider
-      data-partner-interval="5000"
-      data-partner-count="{{ logo_partners|length }}"
-    >
-      <div class="overflow-hidden" data-partner-viewport>
-        <div class="flex transition-transform duration-500 ease-out" data-partner-track>
-          {% for partner in logo_partners %}
-          <div class="w-1/2 shrink-0 px-2 sm:w-1/3 lg:w-1/4 xl:w-1/5" data-partner-slide>
-            <div class="flex h-40 items-center justify-center rounded-xl border border-chocolate/10 bg-white px-4 py-6 sm:h-44">
-              {% set partner_url = partner.website_url|safe_url %}
-              {% if partner_url %}
-              <a href="{{ partner_url }}" target="_blank" rel="noopener noreferrer" class="block" aria-label="{{ partner.name }}">
-                <img
-                  src="{{ url_for('static', filename=partner.logo_path) }}"
-                  alt="{{ partner.name }}"
-                  class="mx-auto h-20 w-auto max-h-24 max-w-[200px] object-contain transition duration-300 hover:scale-105 sm:h-24 sm:max-h-28 sm:max-w-[220px]"
-                  loading="lazy"
-                >
-              </a>
-              {% else %}
-              <img
-                src="{{ url_for('static', filename=partner.logo_path) }}"
-                alt="{{ partner.name }}"
-                class="mx-auto h-20 w-auto max-h-24 max-w-[200px] object-contain sm:h-24 sm:max-h-28 sm:max-w-[220px]"
-                loading="lazy"
-              >
-              {% endif %}
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-      {% if logo_partners|length > 1 %}
-      <div class="mt-8 flex justify-center gap-2" data-partner-dots aria-hidden="true"></div>
-      {% endif %}
-    </div>
+    {{ partner_marquee(logo_partners, card_class='rounded-xl bg-white') }}
     {% else %}
     <div class="mx-auto max-w-xl text-center">
       <p class="font-display text-2xl text-chocolate">Partners coming soon</p>

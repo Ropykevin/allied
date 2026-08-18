@@ -1,0 +1,56 @@
+{# Continuous autoplaying partner logo marquee.
+   Usage:
+     {% from "components/partner_marquee.html" import partner_marquee with context %}
+     {{ partner_marquee(logo_partners) }}
+#}
+{% macro partner_logo_card(partner, card_class='') -%}
+{% set partner_url = partner.website_url|safe_url %}
+<div class="flex h-36 items-center justify-center border border-chocolate/10 bg-cream-soft px-4 py-6 sm:h-40 {{ card_class }}">
+  {% if partner_url %}
+  <a href="{{ partner_url }}" target="_blank" rel="noopener noreferrer" class="block" aria-label="{{ partner.name }}">
+    <img
+      src="{{ url_for('static', filename=partner.logo_path) }}"
+      alt="{{ partner.name }}"
+      class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain transition duration-300 hover:scale-105 sm:h-20 sm:max-h-24 sm:max-w-[200px]"
+      loading="lazy"
+      decoding="async"
+    >
+  </a>
+  {% else %}
+  <img
+    src="{{ url_for('static', filename=partner.logo_path) }}"
+    alt="{{ partner.name }}"
+    class="mx-auto h-16 w-auto max-h-20 max-w-[180px] object-contain sm:h-20 sm:max-h-24 sm:max-w-[200px]"
+    loading="lazy"
+    decoding="async"
+  >
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro partner_marquee(partners, card_class='') -%}
+{% if partners and partners|length > 0 %}
+{% set duration = ([partners|length * 6, 24]|max) ~ 's' %}
+<div
+  class="partner-marquee"
+  data-partner-marquee
+  style="--partner-duration: {{ duration }};"
+  role="region"
+  aria-label="Partner logos"
+>
+  <div class="partner-marquee__track">
+    {% for partner in partners %}
+    <div class="partner-marquee__item">
+      {{ partner_logo_card(partner, card_class) }}
+    </div>
+    {% endfor %}
+    {# Duplicate set for seamless continuous loop #}
+    {% for partner in partners %}
+    <div class="partner-marquee__item partner-marquee__clone" aria-hidden="true">
+      {{ partner_logo_card(partner, card_class) }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{%- endmacro %}
