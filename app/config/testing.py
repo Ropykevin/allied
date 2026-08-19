@@ -30,6 +30,7 @@ class TestingConfig:
     SOCIAL_INSTAGRAM = ""
     SOCIAL_TWITTER = ""
     SOCIAL_YOUTUBE = ""
+    SOCIAL_TRIPADVISOR = ""
     UPLOAD_FOLDER = "instance/test_uploads"
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024
     MAX_VIDEO_BYTES = 8 * 1024 * 1024

@@ -1,4 +1,4 @@
-{# Social icon row — Facebook, Instagram, X/Twitter, YouTube.
+{# Social icon row — Facebook, Instagram, X/Twitter, YouTube, TripAdvisor.
    Set social_variant = "dark" for chocolate/footer backgrounds (default: light).
 #}
 {% set variant = social_variant|default('light') %}
@@ -7,6 +7,7 @@
   ('instagram', social_instagram, 'Instagram'),
   ('twitter', social_twitter, 'X (Twitter)'),
   ('youtube', social_youtube, 'YouTube'),
+  ('tripadvisor', social_tripadvisor, 'TripAdvisor'),
 ] %}
 <div class="flex flex-wrap items-center gap-2" role="list" aria-label="Social media">
   {% for key, url, label in social_items %}
@@ -31,6 +32,11 @@
     {# X logo reads cleanest as a solid mark (stroke outlines look skewed) #}
     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+    {% elif key == 'tripadvisor' %}
+    {# TripAdvisor owl mark #}
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.006 4.295c-2.67 0-5.338.784-7.645 2.353H0l1.963 2.135a5.997 5.997 0 004.01 10.452 6.002 6.002 0 004.096-1.61L12 19.422l1.932-1.798a5.999 5.999 0 008.105-8.874L24 6.648h-4.36c-2.308-1.569-4.977-2.353-7.634-2.353zm0 3.777a3.46 3.46 0 00-3.463 3.462 3.46 3.46 0 003.463 3.463A3.46 3.46 0 0015.47 11.534a3.46 3.46 0 00-3.464-3.462zm-6.1.524a2.994 2.994 0 00-2.995 2.995 2.994 2.994 0 002.995 2.995 2.994 2.994 0 002.994-2.995 2.994 2.994 0 00-2.994-2.995zm12.2 0a2.994 2.994 0 00-2.995 2.995 2.994 2.994 0 002.995 2.995 2.994 2.994 0 002.994-2.995 2.994 2.994 0 00-2.994-2.995zm-12.2 1.566a1.431 1.431 0 011.428 1.43c0 .79-.64 1.428-1.428 1.428a1.43 1.43 0 01-1.43-1.429c0-.789.64-1.429 1.43-1.429zm12.2 0a1.431 1.431 0 011.428 1.43c0 .79-.64 1.428-1.428 1.428a1.43 1.43 0 01-1.43-1.429c0-.789.64-1.429 1.43-1.429zm-6.1.27a1.896 1.896 0 011.896 1.896A1.896 1.896 0 0112.006 14.524a1.896 1.896 0 01-1.896-1.896 1.896 1.896 0 011.896-1.896z"/>
     </svg>
     {% else %}
     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

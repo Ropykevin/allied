@@ -51,6 +51,7 @@ class DevelopmentConfig:
     SOCIAL_INSTAGRAM = os.getenv("SOCIAL_INSTAGRAM", "")
     SOCIAL_TWITTER = os.getenv("SOCIAL_TWITTER", "")
     SOCIAL_YOUTUBE = os.getenv("SOCIAL_YOUTUBE", "")
+    SOCIAL_TRIPADVISOR = os.getenv("SOCIAL_TRIPADVISOR", "")
     GOOGLE_SITE_VERIFICATION = os.getenv(
         "GOOGLE_SITE_VERIFICATION",
         "ajC1R_45-SLiI2qSeOy-V5c2lJurjySBl6LQNI2vbeo",

@@ -1,4 +1,4 @@
-{# Continuous autoplaying partner logo marquee.
+{# Continuous autoplaying partner logo marquee with prev/next controls.
    Usage:
      {% from "components/partner_marquee.html" import partner_marquee with context %}
      {{ partner_marquee(logo_partners) }}
@@ -30,26 +30,47 @@
 
 {% macro partner_marquee(partners, card_class='') -%}
 {% if partners and partners|length > 0 %}
-{% set duration = ([partners|length * 6, 24]|max) ~ 's' %}
+{% set duration = ([partners|length * 6, 24]|max) %}
 <div
   class="partner-marquee"
   data-partner-marquee
-  style="--partner-duration: {{ duration }};"
+  data-partner-count="{{ partners|length }}"
+  data-partner-duration="{{ duration }}"
   role="region"
+  aria-roledescription="carousel"
   aria-label="Partner logos"
 >
-  <div class="partner-marquee__track">
-    {% for partner in partners %}
-    <div class="partner-marquee__item">
-      {{ partner_logo_card(partner, card_class) }}
+  {% if partners|length > 1 %}
+  <div class="mb-4 flex items-center justify-end gap-2">
+    <button
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold"
+      data-partner-prev
+      aria-label="Previous partners"
+    >‹</button>
+    <button
+      type="button"
+      class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-chocolate/15 text-chocolate transition hover:border-gold hover:text-gold"
+      data-partner-next
+      aria-label="Next partners"
+    >›</button>
+  </div>
+  {% endif %}
+
+  <div class="partner-marquee__viewport">
+    <div class="partner-marquee__track" data-partner-track>
+      {% for partner in partners %}
+      <div class="partner-marquee__item" data-partner-item>
+        {{ partner_logo_card(partner, card_class) }}
+      </div>
+      {% endfor %}
+      {# Duplicate set for seamless continuous loop #}
+      {% for partner in partners %}
+      <div class="partner-marquee__item partner-marquee__clone" data-partner-item aria-hidden="true">
+        {{ partner_logo_card(partner, card_class) }}
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-    {# Duplicate set for seamless continuous loop #}
-    {% for partner in partners %}
-    <div class="partner-marquee__item partner-marquee__clone" aria-hidden="true">
-      {{ partner_logo_card(partner, card_class) }}
-    </div>
-    {% endfor %}
   </div>
 </div>
 {% endif %}

@@ -455,24 +455,127 @@
   }
 
   function initPartnerMarquee() {
-    // Continuous scroll is CSS-driven; sync pause if reduced-motion changes.
     var roots = qsa("[data-partner-marquee]");
     if (!roots.length) return;
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    function sync() {
-      roots.forEach(function (root) {
-        var track = qs(".partner-marquee__track", root);
-        if (!track) return;
-        if (reduce.matches) {
-          track.style.animationPlayState = "paused";
-        } else {
-          track.style.animationPlayState = "";
+
+    roots.forEach(function (root) {
+      var track = qs("[data-partner-track]", root) || qs(".partner-marquee__track", root);
+      var prev = qs("[data-partner-prev]", root);
+      var next = qs("[data-partner-next]", root);
+      if (!track) return;
+
+      if (reduce.matches) {
+        root.classList.add("is-static");
+        return;
+      }
+
+      root.classList.add("is-enhanced");
+      track.style.animation = "none";
+
+      var offset = 0;
+      var paused = false;
+      var resumeTimer = null;
+      var durationSec = Number(root.getAttribute("data-partner-duration") || 40);
+      if (!durationSec || durationSec < 12) durationSec = 24;
+
+      function loopWidth() {
+        return track.scrollWidth / 2;
+      }
+
+      function itemWidth() {
+        var item = qs("[data-partner-item]", track) || qs(".partner-marquee__item", track);
+        if (!item) return 180;
+        return item.getBoundingClientRect().width || 180;
+      }
+
+      function normalize() {
+        var half = loopWidth();
+        if (half <= 0) return;
+        while (offset < 0) offset += half;
+        while (offset >= half) offset -= half;
+      }
+
+      function render() {
+        normalize();
+        track.style.transform = "translateX(" + -offset + "px)";
+      }
+
+      function pixelsPerMs() {
+        var half = loopWidth();
+        if (half <= 0) return 0.04;
+        return half / (durationSec * 1000);
+      }
+
+      var lastTs = 0;
+      function tick(ts) {
+        if (!lastTs) lastTs = ts;
+        var delta = ts - lastTs;
+        lastTs = ts;
+        if (!paused && !reduce.matches) {
+          offset += pixelsPerMs() * delta;
+          render();
+        }
+        requestAnimationFrame(tick);
+      }
+
+      function pauseBriefly() {
+        paused = true;
+        if (resumeTimer) clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(function () {
+          if (!root.matches(":hover") && !root.matches(":focus-within")) {
+            paused = false;
+          }
+        }, 2500);
+      }
+
+      function step(dir) {
+        offset += dir * itemWidth();
+        render();
+        pauseBriefly();
+      }
+
+      if (prev) {
+        prev.addEventListener("click", function () {
+          step(-1);
+        });
+      }
+      if (next) {
+        next.addEventListener("click", function () {
+          step(1);
+        });
+      }
+
+      root.addEventListener("mouseenter", function () {
+        paused = true;
+      });
+      root.addEventListener("mouseleave", function () {
+        if (resumeTimer) clearTimeout(resumeTimer);
+        paused = false;
+      });
+      root.addEventListener("focusin", function () {
+        paused = true;
+      });
+      root.addEventListener("focusout", function () {
+        if (!root.contains(document.activeElement)) {
+          paused = false;
         }
       });
-    }
-    sync();
+
+      window.addEventListener("resize", function () {
+        normalize();
+        render();
+      });
+
+      render();
+      requestAnimationFrame(tick);
+    });
+
     if (typeof reduce.addEventListener === "function") {
-      reduce.addEventListener("change", sync);
+      reduce.addEventListener("change", function () {
+        // Full re-init is simplest if preference flips mid-session
+        window.location.reload();
+      });
     }
   }
 
