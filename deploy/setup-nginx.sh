@@ -37,6 +37,21 @@ if [[ -L /etc/nginx/sites-enabled/default ]]; then
   sudo rm -f /etc/nginx/sites-enabled/default
 fi
 
+# Global upload limit (covers Certbot HTTPS server blocks too)
+UPLOAD_LIMIT_SRC="$ROOT_DIR/deploy/nginx-upload-limit.conf"
+if [[ -f "$UPLOAD_LIMIT_SRC" ]]; then
+  sudo cp "$UPLOAD_LIMIT_SRC" /etc/nginx/conf.d/allied-upload-limit.conf
+fi
+
+# Ensure every server block for this site has client_max_body_size (incl. SSL)
+if sudo test -f "$DEST"; then
+  if ! sudo grep -q "client_max_body_size" "$DEST"; then
+    sudo sed -i '/server_name /a\    client_max_body_size 100m;' "$DEST"
+  else
+    sudo sed -i 's/client_max_body_size[[:space:]]*[0-9]\+[kKmMgG]\?;/client_max_body_size 100m;/g' "$DEST"
+  fi
+fi
+
 sudo nginx -t
 sudo systemctl enable nginx
 sudo systemctl reload nginx

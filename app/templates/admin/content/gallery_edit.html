@@ -60,7 +60,7 @@
       <div>
         {{ form.image_file.label(class_='label') }}
         {{ form.image_file(class_='input-field', accept='.jpg,.jpeg,.png,.webp,.mp4,.webm,.mov,image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime') }}
-        <p class="mt-1 text-xs text-ink-muted">Leave empty to keep the current file. JPG/PNG/WEBP or MP4/WebM/MOV (max 64&nbsp;MB).</p>
+        <p class="mt-1 text-xs text-ink-muted">Leave empty to keep the current file. JPG/PNG/WEBP or MP4/WebM/MOV (max 100 MB).</p>
         {% for error in form.image_file.errors %}
         <p class="mt-1 text-sm text-red-600">{{ error }}</p>
         {% endfor %}
