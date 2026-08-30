@@ -3,7 +3,10 @@
 {% block body_class %}min-h-screen flex flex-col{% endblock %}
 
 {% block body %}
-  {% include "components/public_nav.html" %}
+  <div class="sticky top-0 z-40">
+    {% include "components/top_banner.html" %}
+    {% include "components/public_nav.html" %}
+  </div>
   {% include "components/flash.html" %}
   <main id="main-content" class="flex-1" role="main">
     {% block content %}{% endblock %}
